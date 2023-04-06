@@ -1,5 +1,5 @@
 from src.api.training import CreateTraining, Training
-from src.db.training import DBTraining
+from src.db.model.training import DBTraining
 
 from typing import Annotated, AsyncGenerator, List
 from fastapi import APIRouter, Depends
@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 
 async def get_session() -> AsyncGenerator[AsyncSession, None]:
-    from src.database import SessionLocal
+    from src.db.session import SessionLocal
 
     async with SessionLocal() as session:
         yield session
@@ -21,7 +21,7 @@ router = APIRouter(
 )
 
 
-@router.get("/")
+@router.get("")
 async def get_all_trainings(
     session: Annotated[AsyncSession, Depends(get_session)]
 ) -> List[Training]:
@@ -41,7 +41,7 @@ async def get_training(
     return Training.from_orm(training)
 
 
-@router.post("/")
+@router.post("")
 async def post_training(
     training: CreateTraining,
     session: Annotated[AsyncSession, Depends(get_session)],

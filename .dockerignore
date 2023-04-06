@@ -12,3 +12,5 @@ README.md
 okteto.yml
 .stignore
 pytest.ini
+
+*.db

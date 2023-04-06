@@ -1,11 +1,8 @@
 import enum
 from enum import auto
 from sqlalchemy import Column, Integer, String, Enum
-from sqlalchemy.orm import DeclarativeBase
 
-
-class Base(DeclarativeBase):
-    pass
+from src.db.model.base import Base
 
 
 class TrainingType(enum.StrEnum):
@@ -14,7 +11,7 @@ class TrainingType(enum.StrEnum):
 
 
 class DBTraining(Base):
-    __tablename__ = "trainings_table"
+    __tablename__ = "trainings"
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(30), unique=True, index=True)

@@ -1,16 +1,18 @@
-from src.db.training import Base, TrainingType
-from src.test_utils import TestSessionLocal, engine
-from src.api.training import CreateTraining
-from src.main import app
-from src.trainings import get_session
-
 from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.testclient import TestClient
 
+from src.db.model.base import Base
+from src.db.model.training import TrainingType
+from src.db.mock_session import TestSessionLocal, engine
+from src.api.training import CreateTraining
+from src.main import app
+from src.trainings import get_session
+
 
 async def setup_subjects() -> TestClient:
     async with engine.begin() as conn:
+        # This resets test database
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
 

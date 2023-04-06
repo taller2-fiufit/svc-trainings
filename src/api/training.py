@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from src.db.training import TrainingType
+from src.db.model.training import TrainingType
 
 
 class TrainingBase(BaseModel):
