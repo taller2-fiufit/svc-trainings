@@ -5,4 +5,6 @@ from src.config import SQLALCHEMY_DATABASE_URL
 
 
 engine = create_async_engine(SQLALCHEMY_DATABASE_URL)
-SessionLocal = async_sessionmaker(engine, autocommit=False, autoflush=False)
+SessionLocal = async_sessionmaker(
+    engine, autocommit=False, autoflush=False, expire_on_commit=False
+)

@@ -1,7 +1,7 @@
 from src.api.training import CreateTraining, Training
 from src.db.model.training import DBTraining
 
-from typing import Annotated, List
+from typing import Annotated, List, Optional
 from fastapi import APIRouter, Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -30,17 +30,20 @@ async def get_all_trainings(
 @router.get("/{id}")
 async def get_training(
     id: int, session: Annotated[AsyncSession, Depends(get_session)]
-) -> Training:
+) -> Optional[Training]:
     """Get the training with the specified id"""
     training = await session.get(DBTraining, id)
-    return Training.from_orm(training)
+    return None if training is None else Training.from_orm(training)
 
 
 @router.post("")
 async def post_training(
     training: CreateTraining,
     session: Annotated[AsyncSession, Depends(get_session)],
-) -> None:
+) -> Training:
     """Create a new training"""
+    new_training = DBTraining(**training.dict())
     async with session.begin():
-        session.add(DBTraining(**training.dict()))
+        session.add(new_training)
+
+    return Training.from_orm(new_training)
