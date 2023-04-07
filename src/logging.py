@@ -1,4 +1,5 @@
 import logging
+from typing import Tuple
 
 
 def debug(msg: str) -> None:
@@ -20,7 +21,7 @@ def error(msg: str) -> None:
 # disable /health endpoint logging
 class EndpointFilter(logging.Filter):
     def filter(self, record: logging.LogRecord) -> bool:
-        if record.args is None or len(record.args) >= 3:
+        if record.args is None or len(record.args) < 3:
             return True
 
         if not isinstance(record.args, tuple):
