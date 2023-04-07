@@ -23,6 +23,10 @@ spec:
                 name: postgres-config
           ports:
             - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 80
 
 ---
 apiVersion: v1

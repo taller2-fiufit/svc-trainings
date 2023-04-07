@@ -3,10 +3,10 @@ from typing import AsyncGenerator, Dict
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from src.db.migration import upgrade_db
 
 from src.trainings import router
 from src.logging import info
+from src.db.migration import upgrade_db
 
 
 @asynccontextmanager
