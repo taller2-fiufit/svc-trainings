@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 from time import sleep
+from logging import error, debug
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,11 +16,12 @@ def upgrade_db() -> None:
     """upgrade DB via 'alembic upgrade head'"""
     while True:
         try:
+            debug("upgrading database.")
             alembic_cfg = Config("alembic.ini")
             command.upgrade(alembic_cfg, "head")
             break
         except Exception as e:
-            print("ERROR: failed to upgrade.", e)
+            error(f"failed to upgrade. {e}")
             sleep(1)
 
 
