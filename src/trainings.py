@@ -1,17 +1,12 @@
 from src.api.training import CreateTraining, Training
 from src.db.model.training import DBTraining
 
-from typing import Annotated, AsyncGenerator, List
+from typing import Annotated, List
 from fastapi import APIRouter, Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-
-async def get_session() -> AsyncGenerator[AsyncSession, None]:
-    from src.db.session import SessionLocal
-
-    async with SessionLocal() as session:
-        yield session
+from src.db.utils import get_session
 
 
 router = APIRouter(

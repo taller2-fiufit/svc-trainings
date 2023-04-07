@@ -17,13 +17,11 @@ DB_PASS = os.environ.get("POSTGRES_PASSWORD")
 DB_HOST = os.environ.get("POSTGRES_SERVICE_HOST")
 DB_PORT = os.environ.get("POSTGRES_SERVICE_PORT")
 
-_SQLALCHEMY_DATABASE_URL = (
+REMOTE_DATABASE_URL = (
     f"postgresql+asyncpg://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 )
 """Production database URL"""
 
 SQLALCHEMY_DATABASE_URL = (
-    _SQLALCHEMY_DATABASE_URL
-    if os.getenv("LOCAL") is None
-    else LOCAL_DATABASE_URL
+    LOCAL_DATABASE_URL if DB_NAME is None else REMOTE_DATABASE_URL
 )

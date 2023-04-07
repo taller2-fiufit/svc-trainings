@@ -7,7 +7,7 @@ from src.db.model.training import TrainingType
 from src.db.mock_session import TestSessionLocal, engine
 from src.api.training import CreateTraining
 from src.main import app
-from src.trainings import get_session
+from src.db.utils import get_session
 
 
 async def setup_subjects() -> TestClient:
