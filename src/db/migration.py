@@ -1,5 +1,6 @@
+import logging
 from time import sleep
-from logging import error, debug
+from src.logging import error, debug
 
 from alembic.config import Config
 from alembic import command
@@ -25,3 +26,8 @@ async def upgrade_db() -> None:
             except Exception as e:
                 error(f"failed to upgrade. {e}")
                 sleep(1)
+
+    # re-enable logging, as alembic seems to disable it ¯\_(ツ)_/¯
+    for logger in logging.root.manager.loggerDict.values():
+        if hasattr(logger, "disabled"):
+            logger.disabled = False

@@ -6,13 +6,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.db.migration import upgrade_db
 
 from src.trainings import router
+from src.logging import info
 
 
 @asynccontextmanager
 async def lifespan(
     app: FastAPI,
 ) -> AsyncGenerator[None, None]:
+    info("Upgrading DB")
+
     await upgrade_db()
+
     yield
 
 

@@ -16,4 +16,4 @@ test:
 	poetry run pytest .
 
 run: install
-	LOCAL=1 poetry run uvicorn src.main:app --host 0.0.0.0 --port 8080
+	poetry run uvicorn src.main:app --host 0.0.0.0 --port 8080
