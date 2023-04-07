@@ -18,7 +18,8 @@ def upgrade_db() -> None:
             alembic_cfg = Config("alembic.ini")
             command.upgrade(alembic_cfg, "head")
             break
-        except Exception:
+        except Exception as e:
+            print("ERROR: failed to upgrade.", e)
             sleep(1)
 
 
