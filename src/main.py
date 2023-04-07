@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Dict
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -20,9 +20,7 @@ async def lifespan(
     yield
 
 
-app = FastAPI(
-    lifespan=lifespan,
-)
+app = FastAPI(lifespan=lifespan, title="Kinetix", version="0.1.0")
 
 
 app.add_middleware(
@@ -33,4 +31,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 app.include_router(router)
+
+
+@app.get("/health")
+def health_check() -> Dict[str, str]:
+    """Check if server is responsive"""
+    return {"status": "Alive and kicking!"}
