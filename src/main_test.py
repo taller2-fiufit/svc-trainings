@@ -79,3 +79,7 @@ async def test_trainings_post_get() -> None:
     assert got["description"] == body.description
     assert got["type"] == body.type
     assert got["difficulty"] == body.difficulty
+
+    response = client.get(f"/trainings/{got['id']}")
+    assert response.status_code == 200
+    assert got == response.json()
