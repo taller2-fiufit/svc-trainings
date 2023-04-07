@@ -6,5 +6,5 @@ from src.config import TEST_DATABASE_URL
 
 engine = create_async_engine(TEST_DATABASE_URL)
 TestSessionLocal = async_sessionmaker(
-    engine, autocommit=False, autoflush=False
+    engine, autocommit=False, autoflush=False, expire_on_commit=False
 )
