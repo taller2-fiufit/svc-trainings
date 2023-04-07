@@ -35,7 +35,7 @@ app.add_middleware(
 app.include_router(router)
 
 
-@app.get("/health")
+@app.get("/health", include_in_schema=False)
 def health_check() -> Dict[str, str]:
     """Check if server is responsive"""
     return {"status": "Alive and kicking!"}
