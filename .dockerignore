@@ -14,3 +14,4 @@ okteto.yml
 pytest.ini
 
 *.db
+Makefile

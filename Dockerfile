@@ -15,6 +15,8 @@ WORKDIR /code
 
 COPY --from=requirements-stage /tmp/requirements.txt /code/requirements.txt
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+
+COPY ./alembic /code/alembic
 COPY ./src /code/src
 
 EXPOSE 80
