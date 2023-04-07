@@ -1,3 +1,4 @@
+import os
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator, Dict
 
@@ -14,6 +15,7 @@ async def lifespan(
     app: FastAPI,
 ) -> AsyncGenerator[None, None]:
     info("Upgrading DB")
+    info(f"Loaded secret: {os.getenv('TEST_SECRET')}")
 
     await upgrade_db()
 
