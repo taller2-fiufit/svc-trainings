@@ -1,5 +1,4 @@
 import logging
-from typing import Tuple
 
 
 def debug(msg: str) -> None:
