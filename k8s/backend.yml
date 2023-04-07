@@ -21,6 +21,12 @@ spec:
           envFrom:
             - configMapRef:
                 name: postgres-config
+          env:
+            - name: TEST_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: auth-secret
           ports:
             - containerPort: 80
           readinessProbe:

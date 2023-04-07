@@ -15,7 +15,7 @@ build:
 # More info: https://www.okteto.com/docs/reference/manifest/#deploy
 deploy:
   - okteto build -t okteto.dev/svc-trainings
-  - kubectl create secret generic auth-secret --from-literal=TEST_SECRET="${TEST_SECRET}"
+  - kubectl create secret generic secrets --from-literal="auth-secret"="${TEST_SECRET}"
   - kubectl apply -f k8s
 # The dependencies section defines other git repositories to be deployed as part of your development environment
 # More info: https://www.okteto.com/docs/reference/manifest/#dependencies
