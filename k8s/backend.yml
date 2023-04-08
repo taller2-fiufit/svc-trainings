@@ -22,7 +22,7 @@ spec:
             - configMapRef:
                 name: postgres-config
           env:
-            - name: TEST_SECRET
+            - name: AUTH_SECRET
               valueFrom:
                 secretKeyRef:
                   name: secrets

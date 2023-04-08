@@ -1,11 +1,10 @@
-import os
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator, Dict
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.trainings import router
+from src.api.trainings import router
 from src.logging import info
 from src.db.migration import upgrade_db
 
@@ -15,7 +14,6 @@ async def lifespan(
     app: FastAPI,
 ) -> AsyncGenerator[None, None]:
     info("Upgrading DB")
-    info(f"Loaded secret: {os.getenv('TEST_SECRET')}")
 
     await upgrade_db()
 
