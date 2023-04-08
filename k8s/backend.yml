@@ -17,7 +17,7 @@ spec:
       containers:
         - name: backend
           image: okteto.dev/svc-trainings
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           envFrom:
             - configMapRef:
                 name: postgres-config
