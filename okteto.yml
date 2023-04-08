@@ -14,8 +14,12 @@ build:
 # The deploy section defines how to deploy your development environment
 # More info: https://www.okteto.com/docs/reference/manifest/#deploy
 deploy:
+  # build images
   - okteto build -t okteto.dev/svc-trainings
-  - kubectl create secret generic secrets --from-literal="auth-secret"="${AUTH_SECRET}"
+  # update secrets
+  - kubectl delete secret "secrets" || true
+  - kubectl create secret generic "secrets" --from-literal="auth-secret"="${AUTH_SECRET}"
+  # update kubernetes status
   - kubectl apply -f k8s
 # The dependencies section defines other git repositories to be deployed as part of your development environment
 # More info: https://www.okteto.com/docs/reference/manifest/#dependencies
@@ -24,14 +28,14 @@ deploy:
 
 # The dev section defines how to activate a development container
 # More info: https://www.okteto.com/docs/reference/manifest/#dev
-dev:
-  app-deployment:
-    image: ${OKTETO_BUILD_MAIN_IMAGE}
-    sync:
-      - .:/app
-    forward:
-      - 80:80
-    reverse:
-      - 9000:9000
-    volumes:
-      - /root/.cache/pip
+# dev:
+#   app-deployment:
+#     image: ${OKTETO_BUILD_MAIN_IMAGE}
+#     sync:
+#       - .:/app
+#     forward:
+#       - 80:80
+#     reverse:
+#       - 9000:9000
+#     volumes:
+#       - /root/.cache/pip
