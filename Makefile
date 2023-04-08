@@ -17,7 +17,7 @@ test:
 	rm test.db
 
 coverage:
-	poetry run pytest --cov .
+	poetry run pytest --cov . --cov-report xml
 
 run: install
 	poetry run uvicorn src.main:app --host 0.0.0.0 --port 8080
