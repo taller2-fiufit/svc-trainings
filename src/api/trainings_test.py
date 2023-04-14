@@ -2,10 +2,11 @@ from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.testclient import TestClient
 
+from src.auth import get_user, ignore_auth
 from src.db.model.base import Base
 from src.db.model.training import TrainingType
 from src.db.mock_session import TestSessionLocal, engine
-from src.api.training import CreateTraining
+from src.api.model.training import CreateTraining
 from src.main import app
 from src.db.utils import get_session
 
@@ -22,6 +23,7 @@ async def setup_subjects() -> TestClient:
 
     # https://fastapi.tiangolo.com/advanced/testing-dependencies/
     app.dependency_overrides[get_session] = get_mock_session
+    app.dependency_overrides[get_user] = ignore_auth
 
     return TestClient(app)
 
@@ -38,6 +40,14 @@ async def test_trainings_get_empty() -> None:
     assert json == []
 
 
+async def test_trainings_get_nonexistent() -> None:
+    client = await setup_subjects()
+
+    response = client.get("/trainings/1")
+
+    assert response.status_code == 404
+
+
 async def test_trainings_post() -> None:
     client = await setup_subjects()
 
@@ -50,7 +60,11 @@ async def test_trainings_post() -> None:
 
     response = client.post("/trainings/", json=body.dict())
 
-    assert response.status_code == 200
+    assert response.status_code == 201
+
+    result = CreateTraining(**response.json())
+
+    assert result == body
 
 
 async def test_trainings_post_get() -> None:
@@ -67,7 +81,7 @@ async def test_trainings_post_get() -> None:
         difficulty=1,
     )
     response = client.post("/trainings/", json=body.dict())
-    assert response.status_code == 200
+    assert response.status_code == 201
 
     response = client.get("/trainings/")
     assert response.status_code == 200

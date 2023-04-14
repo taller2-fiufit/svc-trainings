@@ -17,10 +17,16 @@ spec:
       containers:
         - name: backend
           image: okteto.dev/svc-trainings
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           envFrom:
             - configMapRef:
                 name: postgres-config
+          env:
+            - name: AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: auth-secret
           ports:
             - containerPort: 80
           readinessProbe:
