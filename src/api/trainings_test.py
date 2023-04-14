@@ -1,8 +1,8 @@
 from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.testclient import TestClient
-from src.auth import get_user, ignore_auth
 
+from src.auth import get_user, ignore_auth
 from src.db.model.base import Base
 from src.db.model.training import TrainingType
 from src.db.mock_session import TestSessionLocal, engine
@@ -60,7 +60,11 @@ async def test_trainings_post() -> None:
 
     response = client.post("/trainings/", json=body.dict())
 
-    assert response.status_code == 200
+    assert response.status_code == 201
+
+    result = CreateTraining(**response.json())
+
+    assert result == body
 
 
 async def test_trainings_post_get() -> None:
@@ -77,7 +81,7 @@ async def test_trainings_post_get() -> None:
         difficulty=1,
     )
     response = client.post("/trainings/", json=body.dict())
-    assert response.status_code == 200
+    assert response.status_code == 201
 
     response = client.get("/trainings/")
     assert response.status_code == 200

@@ -42,7 +42,7 @@ async def get_training(
     return training
 
 
-@router.post("")
+@router.post("", status_code=201)
 async def post_training(
     training: CreateTraining,
     session: Annotated[AsyncSession, Depends(get_session)],
