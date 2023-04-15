@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-from src.api.model.training import CreateTraining, Training
+from src.api.model.training import CreateTraining, PatchTraining, Training
 from src.auth import User, get_user
 from src.db.utils import get_session
 import src.db.trainings as trainings_db
@@ -50,3 +50,19 @@ async def post_training(
 ) -> Training:
     """Create a new training"""
     return await trainings_db.create_training(session, training)
+
+
+@router.patch("/{id}")
+async def patch_training(
+    id: int,
+    training_patch: PatchTraining,
+    session: Annotated[AsyncSession, Depends(get_session)],
+    user: Annotated[User, Depends(get_user)],
+) -> Training:
+    """Create a new training"""
+    training = await trainings_db.patch_training(session, id, training_patch)
+
+    if training is None:
+        raise HTTPException(404, "Resource not found")
+
+    return training
