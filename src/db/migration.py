@@ -40,10 +40,10 @@ async def run_alembic_cmd(cmd: Callable[[Connection, Config], None]) -> None:
 
 
 async def upgrade_db() -> None:
-    """upgrade DB via 'alembic upgrade head'"""
+    """Upgrade DB via 'alembic upgrade head'"""
     await run_alembic_cmd(run_upgrade)
 
 
 async def downgrade_db() -> None:
-    """Downgrade DB to base"""
+    """Downgrade DB via 'alembic downgrade base"""
     await run_alembic_cmd(run_downgrade)
