@@ -71,7 +71,7 @@ jobs:
       - name: Run tests
         run: make test
         env:
-          POSTGRES_SERVICE_PORT: ${{ jobs.services.postgres.ports[5432] }}
+          POSTGRES_SERVICE_PORT: ${{ job.services.postgres.ports[5432] }}
       - name: Run tests and collect coverage
         run: make coverage
 
