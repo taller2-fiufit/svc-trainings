@@ -22,7 +22,9 @@ def run_downgrade(conn: Connection, config: Config) -> None:
     command.downgrade(config, "base")
 
 
-async def run_alembic_cmd(cmd: Callable[[Connection, Config], None]) -> None:
+async def run_alembic_cmd(
+    cmd: Callable[[Connection, Config], None], retry: bool = False
+) -> None:
     while True:
         async with engine.begin() as conn:
             try:
@@ -31,6 +33,8 @@ async def run_alembic_cmd(cmd: Callable[[Connection, Config], None]) -> None:
                 break
             except Exception as e:
                 error(f"failed to upgrade. {e}")
+                if not retry:
+                    break
                 sleep(1)
 
     # re-enable logging, as alembic seems to disable it ¯\_(ツ)_/¯
@@ -41,9 +45,9 @@ async def run_alembic_cmd(cmd: Callable[[Connection, Config], None]) -> None:
 
 async def upgrade_db() -> None:
     """Upgrade DB via 'alembic upgrade head'"""
-    await run_alembic_cmd(run_upgrade)
+    await run_alembic_cmd(run_upgrade, retry=True)
 
 
 async def downgrade_db() -> None:
     """Downgrade DB via 'alembic downgrade base"""
-    await run_alembic_cmd(run_downgrade)
+    await run_alembic_cmd(run_downgrade, retry=False)
