@@ -3,7 +3,7 @@ from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from src.api.model.training import CreateTraining, Training
+from src.api.model.training import CreateTraining, PatchTraining, Training
 from src.db.model.training import DBTraining
 
 
@@ -30,3 +30,20 @@ async def create_training(
         session.add(new_training)
 
     return Training.from_orm(new_training)
+
+
+async def patch_training(
+    session: AsyncSession, id: int, training_patch: PatchTraining
+) -> Optional[Training]:
+    """Updates the training's info"""
+    async with session.begin():
+        training = await session.get(DBTraining, id)
+
+        if training is None:
+            return None
+
+        training.update(**training_patch.dict())
+
+        session.add(training)
+
+    return Training.from_orm(training)

@@ -1,5 +1,6 @@
 import enum
 from enum import auto
+from typing import Optional
 from sqlalchemy import Column, Integer, String, Enum
 
 from src.db.model.base import Base
@@ -18,3 +19,15 @@ class DBTraining(Base):
     description = Column(String(500))
     type: Column[Enum] = Column(Enum(TrainingType))
     difficulty = Column(Integer)
+
+    def update(
+        self,
+        title: Optional[str] = None,
+        description: Optional[str] = None,
+        type: Optional[TrainingType] = None,
+        difficulty: Optional[int] = None,
+    ) -> None:
+        self.title = title or self.title  # type: ignore
+        self.description = description or self.description  # type: ignore
+        self.type = type or self.type  # type: ignore
+        self.difficulty = difficulty or self.difficulty  # type: ignore

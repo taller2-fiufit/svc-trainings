@@ -1,11 +1,11 @@
 import logging
 from time import sleep
-from src.logging import error, debug
 
 from alembic.config import Config
 from alembic import command
 from sqlalchemy import Connection
 
+from src.logging import error, debug
 from src.db.session import engine
 
 
@@ -29,5 +29,5 @@ async def upgrade_db() -> None:
 
     # re-enable logging, as alembic seems to disable it ¯\_(ツ)_/¯
     for logger in logging.root.manager.loggerDict.values():
-        if hasattr(logger, "disabled"):
+        if isinstance(logger, logging.Logger):
             logger.disabled = False
