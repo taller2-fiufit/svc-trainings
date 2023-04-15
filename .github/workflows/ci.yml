@@ -8,6 +8,15 @@ on:
   merge_group:
     types: [checks_requested]
 
+env:
+  POSTGRES_DB: postgres
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: postgres
+  # The hostname used to communicate with the PostgreSQL service container
+  POSTGRES_SERVICE_HOST: localhost
+  # The default PostgreSQL port
+  POSTGRES_SERVICE_PORT: 5432
+
 jobs:
   ci:
     runs-on: ubuntu-latest
@@ -15,10 +24,6 @@ jobs:
     services:
       postgres:
         image: postgres
-        env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_USER: postgres
-          POSTGRES_DB: postgres
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -61,24 +66,8 @@ jobs:
         run: make mypy
       - name: Run tests
         run: make test
-        env:
-          # The hostname used to communicate with the PostgreSQL service container
-          POSTGRES_SERVICE_HOST: postgres
-          # The default PostgreSQL port
-          POSTGRES_SERVICE_PORT: 5432
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_USER: postgres
-          POSTGRES_DB: postgres
-
       - name: Run tests and collect coverage
         run: make coverage
-        env:
-          # The hostname used to communicate with the PostgreSQL service container
-          POSTGRES_SERVICE_HOST: postgres
-          # The default PostgreSQL port
-          POSTGRES_SERVICE_PORT: 5432
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_USER: postgres
-          POSTGRES_DB: postgres
+
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
