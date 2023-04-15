@@ -12,7 +12,6 @@ env:
   POSTGRES_DB: postgres
   POSTGRES_USER: postgres
   POSTGRES_PASSWORD: postgres
-  # The hostname used to communicate with the PostgreSQL service container
   POSTGRES_SERVICE_HOST: localhost
 
 
