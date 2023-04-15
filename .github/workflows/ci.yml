@@ -14,8 +14,8 @@ env:
   POSTGRES_PASSWORD: postgres
   # The hostname used to communicate with the PostgreSQL service container
   POSTGRES_SERVICE_HOST: localhost
-  # The default PostgreSQL port
-  POSTGRES_SERVICE_PORT: 5432
+
+
 
 jobs:
   ci:
@@ -72,6 +72,8 @@ jobs:
         run: make mypy
       - name: Run tests
         run: make test
+        env:
+          POSTGRES_SERVICE_PORT: ${{ jobs.services.postgres.ports[5432] }}
       - name: Run tests and collect coverage
         run: make coverage
 
