@@ -11,6 +11,20 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -47,8 +61,24 @@ jobs:
         run: make mypy
       - name: Run tests
         run: make test
+        env:
+          # The hostname used to communicate with the PostgreSQL service container
+          POSTGRES_SERVICE_HOST: postgres
+          # The default PostgreSQL port
+          POSTGRES_SERVICE_PORT: 5432
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
 
       - name: Run tests and collect coverage
         run: make coverage
+        env:
+          # The hostname used to communicate with the PostgreSQL service container
+          POSTGRES_SERVICE_HOST: postgres
+          # The default PostgreSQL port
+          POSTGRES_SERVICE_PORT: 5432
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3

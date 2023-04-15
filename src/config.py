@@ -1,12 +1,8 @@
 import os
 
 
-TEST_DATABASE_URL = "sqlite+aiosqlite:///./test.db"
-"""Used for tests"""
-
-
 LOCAL_DATABASE_URL = "sqlite+aiosqlite:///./local.db"
-"""Used for alembic's autogeneration of migration scripts"""
+"""Used for testing purposes"""
 
 DB_NAME = os.environ.get("POSTGRES_DB")
 DB_USER = os.environ.get("POSTGRES_USER")

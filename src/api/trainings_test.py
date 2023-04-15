@@ -1,39 +1,27 @@
-from typing import AsyncGenerator, Awaitable, Callable
-from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Awaitable, Callable
 from fastapi.testclient import TestClient
 
 from src.auth import get_user, ignore_auth
-from src.db.model.base import Base
+from src.db.migration import downgrade_db
 from src.db.model.training import TrainingType
-from src.db.mock_session import TestSessionLocal, engine
 from src.api.model.training import CreateTraining
-from src.main import app
-from src.db.utils import get_session
-
-
-async def setup_subjects() -> TestClient:
-    async with engine.begin() as conn:
-        # This resets test database
-        await conn.run_sync(Base.metadata.drop_all)
-        await conn.run_sync(Base.metadata.create_all)
-
-    async def get_mock_session() -> AsyncGenerator[AsyncSession, None]:
-        async with TestSessionLocal() as session:
-            yield session
-
-    # https://fastapi.tiangolo.com/advanced/testing-dependencies/
-    app.dependency_overrides[get_session] = get_mock_session
-    app.dependency_overrides[get_user] = ignore_auth
-
-    return TestClient(app)
+from src.main import app, lifespan
 
 
 def with_client(
     test: Callable[[TestClient], Awaitable[None]]
 ) -> Callable[[], Awaitable[None]]:
     async def decorated_test() -> None:
-        client = await setup_subjects()
-        await test(client)
+        # reset database
+        await downgrade_db()
+
+        # https://fastapi.tiangolo.com/advanced/testing-dependencies/
+        app.dependency_overrides[get_user] = ignore_auth
+
+        # lifespan is not used automatically
+        async with lifespan(app) as _:
+            client = TestClient(app)
+            await test(client)
 
     return decorated_test
 
