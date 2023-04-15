@@ -16,7 +16,6 @@ env:
   POSTGRES_SERVICE_HOST: localhost
 
 
-
 jobs:
   ci:
     runs-on: ubuntu-latest
