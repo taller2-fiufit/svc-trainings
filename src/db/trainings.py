@@ -36,16 +36,14 @@ async def patch_training(
     session: AsyncSession, id: int, training_patch: PatchTraining
 ) -> Optional[Training]:
     """Updates the training's info"""
-    training = await get_training_by_id(session, id)
-
-    if training is None:
-        return None
-
-    old_training = training.dict()
-    old_training.update(training_patch)
-    new_training = DBTraining(**Training(**old_training).dict())
-
     async with session.begin():
-        session.add(new_training)
+        training = await session.get(DBTraining, id)
 
-    return Training.from_orm(new_training)
+        if training is None:
+            return None
+
+        training.update(**training_patch.dict())
+
+        session.add(training)
+
+    return Training.from_orm(training)

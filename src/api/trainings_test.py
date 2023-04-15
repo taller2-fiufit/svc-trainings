@@ -97,3 +97,35 @@ async def test_trainings_post_get() -> None:
     response = client.get(f"/trainings/{got['id']}")
     assert response.status_code == 200
     assert got == response.json()
+
+
+async def test_trainings_patch() -> None:
+    client = await setup_subjects()
+
+    body = CreateTraining(
+        title="title",
+        description="description",
+        type=TrainingType.RUNNING,
+        difficulty=1,
+    )
+    response = client.post("/trainings/", json=body.dict())
+    assert response.status_code == 201
+
+    body.description = "new description"
+    body.type = TrainingType.WALK
+
+    response = client.patch(
+        f"/trainings/{response.json()['id']}", json=body.dict()
+    )
+    assert response.status_code == 200
+
+    got = response.json()
+
+    assert got["title"] == body.title
+    assert got["description"] == body.description
+    assert got["type"] == body.type
+    assert got["difficulty"] == body.difficulty
+
+    response = client.get(f"/trainings/{got['id']}")
+    assert response.status_code == 200
+    assert got == response.json()
