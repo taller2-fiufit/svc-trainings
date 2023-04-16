@@ -15,11 +15,9 @@ jobs:
 
     services:
       postgres:
-        image: postgres
+        image: postgres:latest
         env:
-          POSTGRES_DB: db
-          POSTGRES_USER: user
-          POSTGRES_PASSWORD: user
+          POSTGRES_PASSWORD: postgres
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -63,17 +61,17 @@ jobs:
       - name: Run tests
         run: make test
         env:
-          POSTGRES_DB: db
-          POSTGRES_USER: user
-          POSTGRES_PASSWORD: user
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
           POSTGRES_SERVICE_HOST: localhost
           POSTGRES_SERVICE_PORT: ${{ job.services.postgres.ports[5432] }}
       - name: Run tests and collect coverage
         run: make coverage
         env:
-          POSTGRES_DB: db
-          POSTGRES_USER: user
-          POSTGRES_PASSWORD: user
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
           POSTGRES_SERVICE_HOST: localhost
           POSTGRES_SERVICE_PORT: ${{ job.services.postgres.ports[5432] }}
 
