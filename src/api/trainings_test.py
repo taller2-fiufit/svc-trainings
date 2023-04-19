@@ -18,7 +18,7 @@ async def client() -> AsyncGenerator[AsyncClient, None]:
     app.dependency_overrides[get_user] = ignore_auth
 
     async with lifespan(app):
-        async with AsyncClient(app) as client:
+        async with AsyncClient(app=app) as client:
             yield client
 
 
