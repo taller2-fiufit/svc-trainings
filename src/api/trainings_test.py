@@ -17,12 +17,12 @@ async def client() -> AsyncGenerator[AsyncClient, None]:
     # https://fastapi.tiangolo.com/advanced/testing-dependencies/
     app.dependency_overrides[get_user] = ignore_auth
 
-    async with AsyncClient(app=app, base_url="") as client:
+    async with AsyncClient(app=app, base_url="http://test") as client:
         yield client
 
 
 async def test_trainings_get_empty(client: AsyncClient) -> None:
-    response = await client.get("/trainings/")
+    response = await client.get("/trainings")
 
     assert response.status_code == 200
 
@@ -45,7 +45,7 @@ async def test_trainings_post(client: AsyncClient) -> None:
         difficulty=1,
     )
 
-    response = await client.post("/trainings/", json=body.dict())
+    response = await client.post("/trainings", json=body.dict())
 
     assert response.status_code == 201
 
@@ -55,12 +55,12 @@ async def test_trainings_post(client: AsyncClient) -> None:
 
 
 async def test_trainings_post_no_body(client: AsyncClient) -> None:
-    response = await client.post("/trainings/")
+    response = await client.post("/trainings")
     assert response.status_code == 422
 
 
 async def test_trainings_post_get(client: AsyncClient) -> None:
-    response = await client.get("/trainings/")
+    response = await client.get("/trainings")
     assert response.status_code == 200
     assert response.json() == []
 
@@ -70,10 +70,10 @@ async def test_trainings_post_get(client: AsyncClient) -> None:
         type=TrainingType.WALK,
         difficulty=1,
     )
-    response = await client.post("/trainings/", json=body.dict())
+    response = await client.post("/trainings", json=body.dict())
     assert response.status_code == 201
 
-    response = await client.get("/trainings/")
+    response = await client.get("/trainings")
     assert response.status_code == 200
     assert len(response.json()) == 1
 
@@ -96,7 +96,7 @@ async def test_trainings_patch(client: AsyncClient) -> None:
         type=TrainingType.RUNNING,
         difficulty=1,
     )
-    response = await client.post("/trainings/", json=body.dict())
+    response = await client.post("/trainings", json=body.dict())
     assert response.status_code == 201
 
     body.description = "new description"
@@ -128,7 +128,7 @@ async def test_trainings_invalid_body(client: AsyncClient) -> None:
         difficulty=1,
     )
 
-    response = await client.post("/trainings/", json=body.dict())
+    response = await client.post("/trainings", json=body.dict())
     assert response.status_code == 201
 
     body.title = "other title"
@@ -137,7 +137,7 @@ async def test_trainings_invalid_body(client: AsyncClient) -> None:
     json = body.dict()
     json["title"] = "a" * 31
 
-    response_post = await client.post("/trainings/", json=json)
+    response_post = await client.post("/trainings", json=json)
     response_patch = await client.patch("/trainings/1", json=json)
     assert response_post.status_code == response_patch.status_code == 422
 
@@ -145,7 +145,7 @@ async def test_trainings_invalid_body(client: AsyncClient) -> None:
     json = body.dict()
     json["title"] = ""
 
-    response_post = await client.post("/trainings/", json=json)
+    response_post = await client.post("/trainings", json=json)
     response_patch = await client.patch("/trainings/1", json=json)
     assert response_post.status_code == response_patch.status_code == 422
 
@@ -153,7 +153,7 @@ async def test_trainings_invalid_body(client: AsyncClient) -> None:
     json = body.dict()
     json["description"] = "a" * 301
 
-    response_post = await client.post("/trainings/", json=json)
+    response_post = await client.post("/trainings", json=json)
     response_patch = await client.patch("/trainings/1", json=json)
     assert response_post.status_code == response_patch.status_code == 422
 
@@ -161,7 +161,7 @@ async def test_trainings_invalid_body(client: AsyncClient) -> None:
     json = body.dict()
     json["type"] = "nonexistent type"
 
-    response_post = await client.post("/trainings/", json=json)
+    response_post = await client.post("/trainings", json=json)
     response_patch = await client.patch("/trainings/1", json=json)
     assert response_post.status_code == response_patch.status_code == 422
 
@@ -169,7 +169,7 @@ async def test_trainings_invalid_body(client: AsyncClient) -> None:
     json = body.dict()
     json["difficulty"] = "11"
 
-    response_post = await client.post("/trainings/", json=json)
+    response_post = await client.post("/trainings", json=json)
     response_patch = await client.patch("/trainings/1", json=json)
     assert response_post.status_code == response_patch.status_code == 422
 
@@ -177,6 +177,6 @@ async def test_trainings_invalid_body(client: AsyncClient) -> None:
     json = body.dict()
     json["difficulty"] = "-1"
 
-    response_post = await client.post("/trainings/", json=json)
+    response_post = await client.post("/trainings", json=json)
     response_patch = await client.patch("/trainings/1", json=json)
     assert response_post.status_code == response_patch.status_code == 422
