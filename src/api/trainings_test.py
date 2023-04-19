@@ -17,7 +17,7 @@ async def client() -> AsyncGenerator[AsyncClient, None]:
     # https://fastapi.tiangolo.com/advanced/testing-dependencies/
     app.dependency_overrides[get_user] = ignore_auth
 
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(app=app, base_url="") as client:
         yield client
 
 
