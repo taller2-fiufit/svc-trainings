@@ -3,8 +3,8 @@ from fastapi.testclient import TestClient
 
 from src.auth import get_user, ignore_auth
 from src.db.migration import downgrade_db
-from src.db.model.training import TrainingType
-from src.api.model.training import CreateTraining
+# from src.db.model.training import TrainingType
+# from src.api.model.training import CreateTraining
 from src.main import app, lifespan
 
 
