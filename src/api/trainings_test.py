@@ -22,7 +22,7 @@ async def client() -> AsyncGenerator[AsyncClient, None]:
 
 
 async def test_trainings_get_empty(client: AsyncClient) -> None:
-    response = client.get("/trainings/")
+    response = await client.get("/trainings/")
 
     assert response.status_code == 200
 
@@ -32,7 +32,7 @@ async def test_trainings_get_empty(client: AsyncClient) -> None:
 
 
 async def test_trainings_get_nonexistent(client: AsyncClient) -> None:
-    response = client.get("/trainings/1")
+    response = await client.get("/trainings/1")
 
     assert response.status_code == 404
 
@@ -45,7 +45,7 @@ async def test_trainings_post(client: AsyncClient) -> None:
         difficulty=1,
     )
 
-    response = client.post("/trainings/", json=body.dict())
+    response = await client.post("/trainings/", json=body.dict())
 
     assert response.status_code == 201
 
@@ -55,12 +55,12 @@ async def test_trainings_post(client: AsyncClient) -> None:
 
 
 async def test_trainings_post_no_body(client: AsyncClient) -> None:
-    response = client.post("/trainings/")
+    response = await client.post("/trainings/")
     assert response.status_code == 422
 
 
 async def test_trainings_post_get(client: AsyncClient) -> None:
-    response = client.get("/trainings/")
+    response = await client.get("/trainings/")
     assert response.status_code == 200
     assert response.json() == []
 
@@ -70,10 +70,10 @@ async def test_trainings_post_get(client: AsyncClient) -> None:
         type=TrainingType.WALK,
         difficulty=1,
     )
-    response = client.post("/trainings/", json=body.dict())
+    response = await client.post("/trainings/", json=body.dict())
     assert response.status_code == 201
 
-    response = client.get("/trainings/")
+    response = await client.get("/trainings/")
     assert response.status_code == 200
     assert len(response.json()) == 1
 
@@ -84,7 +84,7 @@ async def test_trainings_post_get(client: AsyncClient) -> None:
     assert got["type"] == body.type
     assert got["difficulty"] == body.difficulty
 
-    response = client.get(f"/trainings/{got['id']}")
+    response = await client.get(f"/trainings/{got['id']}")
     assert response.status_code == 200
     assert got == response.json()
 
@@ -96,13 +96,13 @@ async def test_trainings_patch(client: AsyncClient) -> None:
         type=TrainingType.RUNNING,
         difficulty=1,
     )
-    response = client.post("/trainings/", json=body.dict())
+    response = await client.post("/trainings/", json=body.dict())
     assert response.status_code == 201
 
     body.description = "new description"
     body.type = TrainingType.WALK
 
-    response = client.patch(
+    response = await client.patch(
         f"/trainings/{response.json()['id']}", json=body.dict()
     )
     assert response.status_code == 200
@@ -114,7 +114,7 @@ async def test_trainings_patch(client: AsyncClient) -> None:
     assert got["type"] == body.type
     assert got["difficulty"] == body.difficulty
 
-    response = client.get(f"/trainings/{got['id']}")
+    response = await client.get(f"/trainings/{got['id']}")
     assert response.status_code == 200
     assert got == response.json()
 
@@ -128,7 +128,7 @@ async def test_trainings_invalid_body(client: AsyncClient) -> None:
         difficulty=1,
     )
 
-    response = client.post("/trainings/", json=body.dict())
+    response = await client.post("/trainings/", json=body.dict())
     assert response.status_code == 201
 
     body.title = "other title"
@@ -137,46 +137,46 @@ async def test_trainings_invalid_body(client: AsyncClient) -> None:
     json = body.dict()
     json["title"] = "a" * 31
 
-    response_post = client.post("/trainings/", json=json)
-    response_patch = client.patch("/trainings/1", json=json)
+    response_post = await client.post("/trainings/", json=json)
+    response_patch = await client.patch("/trainings/1", json=json)
     assert response_post.status_code == response_patch.status_code == 422
 
     # short title
     json = body.dict()
     json["title"] = ""
 
-    response_post = client.post("/trainings/", json=json)
-    response_patch = client.patch("/trainings/1", json=json)
+    response_post = await client.post("/trainings/", json=json)
+    response_patch = await client.patch("/trainings/1", json=json)
     assert response_post.status_code == response_patch.status_code == 422
 
     # too long description
     json = body.dict()
     json["description"] = "a" * 301
 
-    response_post = client.post("/trainings/", json=json)
-    response_patch = client.patch("/trainings/1", json=json)
+    response_post = await client.post("/trainings/", json=json)
+    response_patch = await client.patch("/trainings/1", json=json)
     assert response_post.status_code == response_patch.status_code == 422
 
     # nonexistent type
     json = body.dict()
     json["type"] = "nonexistent type"
 
-    response_post = client.post("/trainings/", json=json)
-    response_patch = client.patch("/trainings/1", json=json)
+    response_post = await client.post("/trainings/", json=json)
+    response_patch = await client.patch("/trainings/1", json=json)
     assert response_post.status_code == response_patch.status_code == 422
 
     # too high difficulty
     json = body.dict()
     json["difficulty"] = "11"
 
-    response_post = client.post("/trainings/", json=json)
-    response_patch = client.patch("/trainings/1", json=json)
+    response_post = await client.post("/trainings/", json=json)
+    response_patch = await client.patch("/trainings/1", json=json)
     assert response_post.status_code == response_patch.status_code == 422
 
     # negative difficulty
     json = body.dict()
     json["difficulty"] = "-1"
 
-    response_post = client.post("/trainings/", json=json)
-    response_patch = client.patch("/trainings/1", json=json)
+    response_post = await client.post("/trainings/", json=json)
+    response_patch = await client.patch("/trainings/1", json=json)
     assert response_post.status_code == response_patch.status_code == 422
