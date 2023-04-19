@@ -9,11 +9,11 @@ on:
     types: [checks_requested]
 
 env:
-  POSTGRES_DB: ${{ vars.DB_NAME }}
-  POSTGRES_USER: ${{ vars.DB_USER }}
-  POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
-  POSTGRES_SERVICE_HOST: ${{ vars.DB_HOST }}
-  POSTGRES_SERVICE_PORT: ${{ vars.DB_PORT }}
+  POSTGRES_DB: db
+  POSTGRES_USER: user
+  POSTGRES_PASSWORD: postgres
+  POSTGRES_SERVICE_HOST: localhost
+  POSTGRES_SERVICE_PORT: 5432
 
 jobs:
   ci:
@@ -32,7 +32,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
         ports:
-          - ${{ env.POSTGRES_SERVICE_PORT }}:${{ env.POSTGRES_SERVICE_PORT }}
+          - 5432:5432
 
     steps:
       - name: Checkout
