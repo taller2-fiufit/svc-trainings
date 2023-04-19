@@ -1,11 +1,12 @@
-from typing import Awaitable, Callable
+from typing import AsyncGenerator
 from httpx import AsyncClient
+import pytest
 
 from src.auth import get_user, ignore_auth
 from src.db.migration import downgrade_db
 from src.db.model.training import TrainingType
 from src.api.model.training import CreateTraining
-from src.main import app, lifespan
+from src.main import app
 
 
 @pytest.fixture
