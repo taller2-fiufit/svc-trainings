@@ -21,6 +21,8 @@ async def client() -> AsyncGenerator[AsyncClient, None]:
         async with AsyncClient(app=app) as client:
             yield client
 
+    await downgrade_db()
+
 
 async def test_trainings_get_empty(client: AsyncClient) -> None:
     response = await client.get("/trainings")
