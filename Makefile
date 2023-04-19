@@ -13,7 +13,7 @@ mypy:
 	poetry run mypy --strict src alembic
 
 test:
-	poetry run pytest .
+	poetry run pytest -sv .
 	rm local.db || true
 
 coverage:
