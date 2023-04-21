@@ -17,7 +17,6 @@ depends_on = None
 
 
 def upgrade() -> None:
-    print("UPGRADING...")
     op.create_table(
         "trainings",
         sa.Column("id", sa.Integer(), nullable=False),
@@ -38,7 +37,6 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    print("DOWNGRADING...")
     op.drop_index(op.f("ix_trainings_title"), table_name="trainings")
     op.drop_index(op.f("ix_trainings_id"), table_name="trainings")
     op.drop_table("trainings")

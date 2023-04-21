@@ -14,7 +14,7 @@ mypy:
 
 test:
 	poetry run pytest -sv .
-	rm local.db || true
+	rm local.db 2> /dev/null || true
 
 coverage:
 	poetry run pytest --cov . --cov-report xml

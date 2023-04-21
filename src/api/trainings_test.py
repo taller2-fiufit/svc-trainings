@@ -1,3 +1,4 @@
+import asyncio
 import pytest
 from typing import AsyncGenerator
 from httpx import AsyncClient
@@ -18,10 +19,8 @@ async def client() -> AsyncGenerator[AsyncClient, None]:
     app.dependency_overrides[get_user] = ignore_auth
 
     async with lifespan(app):
-        async with AsyncClient(app=app) as client:
+        async with AsyncClient(app=app, base_url="http://test") as client:
             yield client
-
-    await downgrade_db()
 
 
 async def test_trainings_get_empty(client: AsyncClient) -> None:
