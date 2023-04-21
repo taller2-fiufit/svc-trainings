@@ -1,46 +1,29 @@
-from typing import AsyncGenerator, Awaitable, Callable
-from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi.testclient import TestClient
+import pytest
+from typing import AsyncGenerator
+from httpx import AsyncClient
 
 from src.auth import get_user, ignore_auth
-from src.db.model.base import Base
+from src.db.migration import downgrade_db
 from src.db.model.training import TrainingType
-from src.db.mock_session import TestSessionLocal, engine
 from src.api.model.training import CreateTraining
-from src.main import app
-from src.db.utils import get_session
+from src.main import app, lifespan
 
 
-async def setup_subjects() -> TestClient:
-    async with engine.begin() as conn:
-        # This resets test database
-        await conn.run_sync(Base.metadata.drop_all)
-        await conn.run_sync(Base.metadata.create_all)
-
-    async def get_mock_session() -> AsyncGenerator[AsyncSession, None]:
-        async with TestSessionLocal() as session:
-            yield session
+@pytest.fixture
+async def client() -> AsyncGenerator[AsyncClient, None]:
+    # reset database
+    await downgrade_db()
 
     # https://fastapi.tiangolo.com/advanced/testing-dependencies/
-    app.dependency_overrides[get_session] = get_mock_session
     app.dependency_overrides[get_user] = ignore_auth
 
-    return TestClient(app)
+    async with lifespan(app):
+        async with AsyncClient(app=app, base_url="http://test") as client:
+            yield client
 
 
-def with_client(
-    test: Callable[[TestClient], Awaitable[None]]
-) -> Callable[[], Awaitable[None]]:
-    async def decorated_test() -> None:
-        client = await setup_subjects()
-        await test(client)
-
-    return decorated_test
-
-
-@with_client
-async def test_trainings_get_empty(client: TestClient) -> None:
-    response = client.get("/trainings/")
+async def test_trainings_get_empty(client: AsyncClient) -> None:
+    response = await client.get("/trainings")
 
     assert response.status_code == 200
 
@@ -49,15 +32,13 @@ async def test_trainings_get_empty(client: TestClient) -> None:
     assert json == []
 
 
-@with_client
-async def test_trainings_get_nonexistent(client: TestClient) -> None:
-    response = client.get("/trainings/1")
+async def test_trainings_get_nonexistent(client: AsyncClient) -> None:
+    response = await client.get("/trainings/1")
 
     assert response.status_code == 404
 
 
-@with_client
-async def test_trainings_post(client: TestClient) -> None:
+async def test_trainings_post(client: AsyncClient) -> None:
     body = CreateTraining(
         title="title",
         description="description",
@@ -65,7 +46,7 @@ async def test_trainings_post(client: TestClient) -> None:
         difficulty=1,
     )
 
-    response = client.post("/trainings/", json=body.dict())
+    response = await client.post("/trainings", json=body.dict())
 
     assert response.status_code == 201
 
@@ -74,15 +55,13 @@ async def test_trainings_post(client: TestClient) -> None:
     assert result == body
 
 
-@with_client
-async def test_trainings_post_no_body(client: TestClient) -> None:
-    response = client.post("/trainings/")
+async def test_trainings_post_no_body(client: AsyncClient) -> None:
+    response = await client.post("/trainings")
     assert response.status_code == 422
 
 
-@with_client
-async def test_trainings_post_get(client: TestClient) -> None:
-    response = client.get("/trainings/")
+async def test_trainings_post_get(client: AsyncClient) -> None:
+    response = await client.get("/trainings")
     assert response.status_code == 200
     assert response.json() == []
 
@@ -92,10 +71,10 @@ async def test_trainings_post_get(client: TestClient) -> None:
         type=TrainingType.WALK,
         difficulty=1,
     )
-    response = client.post("/trainings/", json=body.dict())
+    response = await client.post("/trainings", json=body.dict())
     assert response.status_code == 201
 
-    response = client.get("/trainings/")
+    response = await client.get("/trainings")
     assert response.status_code == 200
     assert len(response.json()) == 1
 
@@ -106,26 +85,25 @@ async def test_trainings_post_get(client: TestClient) -> None:
     assert got["type"] == body.type
     assert got["difficulty"] == body.difficulty
 
-    response = client.get(f"/trainings/{got['id']}")
+    response = await client.get(f"/trainings/{got['id']}")
     assert response.status_code == 200
     assert got == response.json()
 
 
-@with_client
-async def test_trainings_patch(client: TestClient) -> None:
+async def test_trainings_patch(client: AsyncClient) -> None:
     body = CreateTraining(
         title="title",
         description="description",
         type=TrainingType.RUNNING,
         difficulty=1,
     )
-    response = client.post("/trainings/", json=body.dict())
+    response = await client.post("/trainings", json=body.dict())
     assert response.status_code == 201
 
     body.description = "new description"
     body.type = TrainingType.WALK
 
-    response = client.patch(
+    response = await client.patch(
         f"/trainings/{response.json()['id']}", json=body.dict()
     )
     assert response.status_code == 200
@@ -137,13 +115,12 @@ async def test_trainings_patch(client: TestClient) -> None:
     assert got["type"] == body.type
     assert got["difficulty"] == body.difficulty
 
-    response = client.get(f"/trainings/{got['id']}")
+    response = await client.get(f"/trainings/{got['id']}")
     assert response.status_code == 200
     assert got == response.json()
 
 
-@with_client
-async def test_trainings_invalid_body(client: TestClient) -> None:
+async def test_trainings_invalid_body(client: AsyncClient) -> None:
     # valid body
     body = CreateTraining(
         title="title",
@@ -152,7 +129,7 @@ async def test_trainings_invalid_body(client: TestClient) -> None:
         difficulty=1,
     )
 
-    response = client.post("/trainings/", json=body.dict())
+    response = await client.post("/trainings", json=body.dict())
     assert response.status_code == 201
 
     body.title = "other title"
@@ -161,46 +138,46 @@ async def test_trainings_invalid_body(client: TestClient) -> None:
     json = body.dict()
     json["title"] = "a" * 31
 
-    response_post = client.post("/trainings/", json=json)
-    response_patch = client.patch("/trainings/1", json=json)
+    response_post = await client.post("/trainings", json=json)
+    response_patch = await client.patch("/trainings/1", json=json)
     assert response_post.status_code == response_patch.status_code == 422
 
     # short title
     json = body.dict()
     json["title"] = ""
 
-    response_post = client.post("/trainings/", json=json)
-    response_patch = client.patch("/trainings/1", json=json)
+    response_post = await client.post("/trainings", json=json)
+    response_patch = await client.patch("/trainings/1", json=json)
     assert response_post.status_code == response_patch.status_code == 422
 
     # too long description
     json = body.dict()
     json["description"] = "a" * 301
 
-    response_post = client.post("/trainings/", json=json)
-    response_patch = client.patch("/trainings/1", json=json)
+    response_post = await client.post("/trainings", json=json)
+    response_patch = await client.patch("/trainings/1", json=json)
     assert response_post.status_code == response_patch.status_code == 422
 
     # nonexistent type
     json = body.dict()
     json["type"] = "nonexistent type"
 
-    response_post = client.post("/trainings/", json=json)
-    response_patch = client.patch("/trainings/1", json=json)
+    response_post = await client.post("/trainings", json=json)
+    response_patch = await client.patch("/trainings/1", json=json)
     assert response_post.status_code == response_patch.status_code == 422
 
     # too high difficulty
     json = body.dict()
     json["difficulty"] = "11"
 
-    response_post = client.post("/trainings/", json=json)
-    response_patch = client.patch("/trainings/1", json=json)
+    response_post = await client.post("/trainings", json=json)
+    response_patch = await client.patch("/trainings/1", json=json)
     assert response_post.status_code == response_patch.status_code == 422
 
     # negative difficulty
     json = body.dict()
     json["difficulty"] = "-1"
 
-    response_post = client.post("/trainings/", json=json)
-    response_patch = client.patch("/trainings/1", json=json)
+    response_post = await client.post("/trainings", json=json)
+    response_patch = await client.patch("/trainings/1", json=json)
     assert response_post.status_code == response_patch.status_code == 422

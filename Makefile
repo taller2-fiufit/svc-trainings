@@ -13,8 +13,8 @@ mypy:
 	poetry run mypy --strict src alembic
 
 test:
-	poetry run pytest .
-	rm test.db
+	poetry run pytest -sv .
+	rm local.db 2> /dev/null || true
 
 coverage:
 	poetry run pytest --cov . --cov-report xml
