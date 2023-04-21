@@ -66,3 +66,13 @@ async def patch_training(
         raise HTTPException(404, "Resource not found")
 
     return training
+
+
+@router.delete("/{id}")
+async def delete_training(
+    id: int,
+    session: Annotated[AsyncSession, Depends(get_session)],
+    user: Annotated[User, Depends(get_user)],
+) -> None:
+    """Create a new training"""
+    await trainings_db.delete_training(session, id)

@@ -47,3 +47,14 @@ async def patch_training(
         session.add(training)
 
     return Training.from_orm(training)
+
+
+async def delete_training(session: AsyncSession, id: int) -> None:
+    """Deletes the training"""
+    async with session.begin():
+        training = await session.get(DBTraining, id)
+
+        if training is None:
+            return
+
+        await session.delete(training)
