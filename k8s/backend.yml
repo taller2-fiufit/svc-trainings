@@ -27,6 +27,16 @@ spec:
                 secretKeyRef:
                   name: secrets
                   key: auth-secret
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: aws-access-key-id
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: aws-secret-access-key
           ports:
             - containerPort: 80
           readinessProbe:
