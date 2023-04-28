@@ -176,7 +176,7 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 name = "boto3-stubs"
 version = "1.26.122"
 description = "Type annotations for boto3 1.26.122 generated with mypy-boto3-builder 7.14.5"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -562,7 +562,7 @@ crt = ["awscrt (==0.16.9)"]
 name = "botocore-stubs"
 version = "1.29.122"
 description = "Type annotations and code completion for botocore"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
@@ -1163,7 +1163,7 @@ reports = ["lxml"]
 name = "mypy-boto3-sqs"
 version = "1.26.0.post1"
 description = "Type annotations for boto3.SQS 1.26.0 service generated with mypy-boto3-builder 7.11.10"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -1615,7 +1615,7 @@ full = ["httpx (>=0.22.0)", "itsdangerous", "jinja2", "python-multipart", "pyyam
 name = "types-awscrt"
 version = "0.16.16"
 description = "Type annotations and code completion for awscrt"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
@@ -1654,7 +1654,7 @@ types-pyasn1 = "*"
 name = "types-s3transfer"
 version = "0.6.0.post7"
 description = "Type annotations and code completion for s3transfer"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
@@ -1716,4 +1716,4 @@ standard = ["colorama (>=0.4)", "httptools (>=0.5.0)", "python-dotenv (>=0.13)",
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "8f7db369715103c1b00b068dbfcad02272253c1374dbe996c7031f194720269d"
+content-hash = "1f60efc8d4b57b27d4bb493669fc7685452f73ace1b5650d66fee905cfd3af9d"

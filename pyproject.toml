@@ -16,6 +16,7 @@ sqlalchemy = {extras = ["asyncio"], version = "^2.0.9"}
 asyncpg = "^0.27.0"
 alembic = "^1.10.3"
 boto3 = "^1.26.122"
+boto3-stubs = {extras = ["sqs"], version = "^1.26.122"}
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.1.0"
@@ -27,7 +28,6 @@ flake8 = "^6.0.0"
 httpx = "^0.23.3"
 aiosqlite = "^0.18.0"
 types-python-jose = "^3.3.4.6"
-boto3-stubs = {extras = ["sqs"], version = "^1.26.122"}
 
 [tool.black]
 line-length = 79
