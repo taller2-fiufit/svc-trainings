@@ -13,12 +13,7 @@ from src.metrics.logging_queue import LoggingQueue
 
 
 def env_was_initialized() -> bool:
-    return all(
-        (
-            AWS_ACCESS_KEY_ID is not None,
-            AWS_SECRET_ACCESS_KEY is not None,
-        )
-    )
+    return AWS_ACCESS_KEY_ID != "" and AWS_SECRET_ACCESS_KEY != ""
 
 
 def get_aws_queue() -> Queue:
