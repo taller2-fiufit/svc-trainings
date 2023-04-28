@@ -1,5 +1,6 @@
 from datetime import datetime
 import json
+from typing import Callable
 
 from pydantic import BaseModel
 
@@ -34,3 +35,7 @@ def report_training_creation() -> None:
         MessageDeduplicationId=UidCounter.next(),
         MessageGroupId=MESSAGE_GROUP_ID,
     )
+
+
+def get_reporter() -> Callable[[], None]:
+    return report_training_creation
