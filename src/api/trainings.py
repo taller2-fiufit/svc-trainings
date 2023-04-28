@@ -1,4 +1,4 @@
-from typing import Annotated, List
+from typing import Annotated, Callable, List
 
 from fastapi import APIRouter, Depends, HTTPException
 
@@ -9,6 +9,7 @@ from src.api.model.training import CreateTraining, PatchTraining, Training
 from src.auth import User, get_user
 from src.db.utils import get_session
 import src.db.trainings as trainings_db
+from src.metrics.reports import get_reporter
 
 
 router = APIRouter(
@@ -46,10 +47,13 @@ async def get_training(
 async def post_training(
     training: CreateTraining,
     session: Annotated[AsyncSession, Depends(get_session)],
+    report_creation: Annotated[Callable[[], None], Depends(get_reporter)],
     user: Annotated[User, Depends(get_user)],
 ) -> Training:
     """Create a new training"""
-    return await trainings_db.create_training(session, training)
+    new_training = await trainings_db.create_training(session, training)
+    report_creation()
+    return new_training
 
 
 @router.patch("/{id}")

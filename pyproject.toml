@@ -15,7 +15,8 @@ python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 sqlalchemy = {extras = ["asyncio"], version = "^2.0.9"}
 asyncpg = "^0.27.0"
 alembic = "^1.10.3"
-
+boto3 = "^1.26.122"
+boto3-stubs = {extras = ["sqs"], version = "^1.26.122"}
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.1.0"

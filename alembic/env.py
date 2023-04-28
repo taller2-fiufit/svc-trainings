@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
 
 from src.db.model.base import Base
-from src.config import SQLALCHEMY_DATABASE_URL
+from src.db.config import SQLALCHEMY_DATABASE_URL
 
 
 # import needed to run model classes declarations
