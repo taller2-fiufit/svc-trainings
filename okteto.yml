@@ -18,9 +18,9 @@ deploy:
   - okteto build -t okteto.dev/svc-trainings
   # update secrets
   - kubectl delete secret "secrets" || true
-  - kubectl create secret generic "secrets" \
-    --from-literal="auth-secret"="${AUTH_SECRET}" \
-    --from-literal="aws-access-key-id"="${AWS_ACCESS_KEY_ID}" \
+  - kubectl create secret generic "secrets"
+    --from-literal="auth-secret"="${AUTH_SECRET}"
+    --from-literal="aws-access-key-id"="${AWS_ACCESS_KEY_ID}"
     --from-literal="aws-secret-access-key"="${AWS_SECRET_ACCESS_KEY}"
   # update kubernetes status
   - kubectl apply -f k8s
