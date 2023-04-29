@@ -11,7 +11,9 @@ from fastapi.security import OAuth2PasswordBearer
 _AUTH_SECRET = os.getenv("AUTH_SECRET")
 AUTH_SECRET = _AUTH_SECRET if _AUTH_SECRET is not None else ""
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="https://svc-users-fedecolangelo.cloud.okteto.net/tokens",
+)
 
 
 class User(BaseModel):

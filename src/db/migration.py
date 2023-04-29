@@ -26,16 +26,16 @@ async def run_alembic_cmd(
     cmd: Callable[[Connection, Config], None], retry: bool = False
 ) -> None:
     while True:
-        async with engine.begin() as conn:
-            try:
+        try:
+            async with engine.begin() as conn:
                 alembic_cfg = Config("alembic.ini")
                 await conn.run_sync(cmd, alembic_cfg)
                 break
-            except Exception as e:
-                error(f"failed to upgrade. {e}")
-                if not retry:
-                    break
-                sleep(1)
+        except Exception as e:
+            error(f"failed to upgrade. {e}")
+            if not retry:
+                break
+            sleep(1)
 
     # re-enable logging, as alembic seems to disable it ¯\_(ツ)_/¯
     for logger in logging.root.manager.loggerDict.values():

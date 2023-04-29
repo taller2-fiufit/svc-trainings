@@ -21,6 +21,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: postgres-config
+            - configMapRef:
+                name: backend-config
           env:
             - name: AUTH_SECRET
               valueFrom:
@@ -43,6 +45,13 @@ spec:
             httpGet:
               path: /health
               port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 2
+          resources:
+            limits:
+              memory: "3Gi"
+              cpu: "1000m"
 
 ---
 apiVersion: v1

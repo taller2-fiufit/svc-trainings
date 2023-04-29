@@ -27,6 +27,19 @@ spec:
           volumeMounts:
             - mountPath: /var/lib/postgresql
               name: postgredb
+          readinessProbe:
+            exec:
+              command:
+                - /bin/bash
+                - -c
+                - exec pg_isready -d ${POSTGRES_DB} -U ${POSTGRES_USER} -h localhost -p 5432
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 2
+          resources:
+            limits:
+              memory: "3Gi"
+              cpu: "1000m"
       volumes:
         - name: postgredb
           persistentVolumeClaim:
