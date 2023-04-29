@@ -45,6 +45,10 @@ spec:
             httpGet:
               path: /health
               port: 80
+          resources:
+            limits:
+              memory: "3Gi"
+              cpu: "1000m"
 
 ---
 apiVersion: v1
