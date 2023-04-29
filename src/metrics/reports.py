@@ -7,34 +7,26 @@ from src.metrics.queue import QUEUE
 
 
 MESSAGE_GROUP_ID = "metrics"
-DEDUPLICATION_PREPEND = "trainings"
-
-
-class UidCounter:
-    counter = 0
-
-    @classmethod
-    def next(cls) -> str:
-        cls.counter += 1
-        return f"{DEDUPLICATION_PREPEND}-{cls.counter}"
+SERVICE_NAME = "trainings"
+CMD_CREATED = "trainingCreated"
 
 
 class TrainingCreationReport(BaseModel):
-    service: str = "trainings"
-    command: str = "trainingCreated"
+    service: str = SERVICE_NAME
+    command: str = CMD_CREATED
     timestamp: datetime
 
 
-def report_training_creation() -> None:
+def report_training_creation(id: int) -> None:
     body = TrainingCreationReport(timestamp=datetime.now()).json()
     # Send message to SQS queue
     _ = QUEUE.send_message(
         MessageBody=body,
         # MessageAttributes={},
-        MessageDeduplicationId=UidCounter.next(),
+        MessageDeduplicationId=f"{SERVICE_NAME}-{CMD_CREATED}-{id}",
         MessageGroupId=MESSAGE_GROUP_ID,
     )
 
 
-def get_reporter() -> Callable[[], None]:
+def get_reporter() -> Callable[[int], None]:
     return report_training_creation

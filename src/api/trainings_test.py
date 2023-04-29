@@ -17,7 +17,11 @@ async def client() -> AsyncGenerator[AsyncClient, None]:
 
     # https://fastapi.tiangolo.com/advanced/testing-dependencies/
     app.dependency_overrides[get_user] = ignore_auth
-    app.dependency_overrides[get_reporter] = lambda: (lambda: None)
+
+    def stub_reporter(_: int) -> None:
+        pass
+
+    app.dependency_overrides[get_reporter] = lambda: stub_reporter
 
     async with lifespan(app):
         async with AsyncClient(app=app, base_url="http://test") as client:
