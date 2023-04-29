@@ -21,6 +21,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: postgres-config
+            - configMapRef:
+                name: backend-config
           env:
             - name: AUTH_SECRET
               valueFrom:
