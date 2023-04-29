@@ -22,16 +22,9 @@ async def lifespan(
 
 app = FastAPI(lifespan=lifespan, title="Kinetix", version="0.1.0")
 
-origins = [
-    "http://localhost:*",
-    "http://*-megaredhand.cloud.okteto.com",
-    "http://*-fedecolangelo.cloud.okteto.com",
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
