@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator, Dict
+import re
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -22,15 +23,18 @@ async def lifespan(
 
 app = FastAPI(lifespan=lifespan, title="Kinetix", version="0.1.0")
 
-origins = [
-    "http://localhost:*",
-    "http://*-megaredhand.cloud.okteto.com",
-    "http://*-fedecolangelo.cloud.okteto.com",
-]
+
+origins_regex = re.compile(
+    (
+        r"https?:\/\/"  # http:// or https://
+        r"(localhost(:[0-9]*)?|"  # localhost, localhost:$PORT or ...
+        r"[\w\.]*(megaredhand|fedecolangelo)\.cloud\.okteto\.net)"  # okteto
+    )
+)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origin_regex=origins_regex,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
