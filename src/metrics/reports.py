@@ -19,13 +19,19 @@ class TrainingCreationReport(BaseModel):
 
 def report_training_creation(id: int) -> None:
     body = TrainingCreationReport(timestamp=datetime.now()).json()
-    # Send message to SQS queue
-    _ = QUEUE.send_message(
-        MessageBody=body,
-        # MessageAttributes={},
-        MessageDeduplicationId=f"{SERVICE_NAME}-{CMD_CREATED}-{id}",
-        MessageGroupId=MESSAGE_GROUP_ID,
-    )
+
+    if QUEUE.url.endswith(".fifo"):
+        # Send message with SQS FIFO-only parameters
+        _ = QUEUE.send_message(
+            MessageBody=body,
+            # MessageDeduplicationId and MessageGroupId only for FIFO queues
+            MessageDeduplicationId=f"{SERVICE_NAME}-{CMD_CREATED}-{id}",
+            MessageGroupId=MESSAGE_GROUP_ID,
+        )
+    else:
+        _ = QUEUE.send_message(
+            MessageBody=body,
+        )
 
 
 def get_reporter() -> Callable[[int], None]:

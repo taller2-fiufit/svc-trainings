@@ -5,6 +5,8 @@ from src.logging import info
 
 
 class LoggingQueue:
+    url: str = "https://sqs.ex-north-x.amazonaws.example.com/xx/TestQueue.fifo"
+
     def send_message(
         self,
         MessageBody: str = "",
