@@ -5,5 +5,4 @@ metadata:
   labels:
     app: backend
 data:
-  SQS_REGION: us-east-1
-  SQS_QUEUE_NAME: MetricsQueue_Production
+  SQS_QUEUE_URL: https://sqs.us-east-1.amazonaws.com/228452873325/MetricsQueue_Production
