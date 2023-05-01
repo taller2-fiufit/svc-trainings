@@ -51,7 +51,9 @@ async def post_training(
     user: Annotated[User, Depends(get_user)],
 ) -> Training:
     """Create a new training"""
-    new_training = await trainings_db.create_training(session, training)
+    new_training = await trainings_db.create_training(
+        session, user.sub, training
+    )
     report_creation(new_training.id)
     return new_training
 
@@ -64,7 +66,9 @@ async def patch_training(
     user: Annotated[User, Depends(get_user)],
 ) -> Training:
     """Create a new training"""
-    training = await trainings_db.patch_training(session, id, training_patch)
+    training = await trainings_db.patch_training(
+        session, user.sub, id, training_patch
+    )
 
     if training is None:
         raise HTTPException(404, "Resource not found")
