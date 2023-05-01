@@ -5,5 +5,5 @@ metadata:
   labels:
     app: backend
 data:
-  SQS_REGION: sa-east-1
-  SQS_QUEUE_NAME: MetricsQueue.fifo
+  SQS_REGION: us-east-1
+  SQS_QUEUE_NAME: MetricsQueue_Production
