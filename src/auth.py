@@ -1,3 +1,4 @@
+from http import HTTPStatus
 import os
 from typing import Annotated
 from fastapi import Depends, HTTPException
@@ -31,7 +32,9 @@ async def get_user(token: Annotated[str, Depends(oauth2_scheme)]) -> User:
             options={"verify_sub": False},
         )
     except (JWTError, ExpiredSignatureError, JWTClaimsError):
-        raise HTTPException(401, "Token is invalid or has expired")
+        raise HTTPException(
+            HTTPStatus.UNAUTHORIZED, "Token is invalid or has expired"
+        )
 
     return User(**user_info)
 

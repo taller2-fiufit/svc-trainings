@@ -1,4 +1,6 @@
+from http import HTTPStatus
 from typing import List, Optional
+from fastapi import HTTPException
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -7,18 +9,27 @@ from src.api.model.training import CreateTraining, PatchTraining, Training
 from src.db.model.training import DBTraining
 
 
-async def get_all_trainings(session: AsyncSession) -> List[Training]:
-    res = await session.scalars(select(DBTraining).offset(0).limit(100))
+async def get_all_trainings(
+    session: AsyncSession, offset: int, limit: int, user: Optional[int] = None
+) -> List[Training]:
+    query = select(DBTraining)
+
+    if user is not None:
+        query = query.filter_by(author=user)
+
+    res = await session.scalars(query.offset(offset).limit(limit))
     trainings = res.all()
 
     return list(map(DBTraining.to_api_model, trainings))
 
 
-async def get_training_by_id(
-    session: AsyncSession, id: int
-) -> Optional[Training]:
+async def get_training_by_id(session: AsyncSession, id: int) -> Training:
     training = await session.get(DBTraining, id)
-    return None if training is None else training.to_api_model()
+
+    if training is None:
+        raise HTTPException(HTTPStatus.NOT_FOUND, "Resource not found")
+
+    return training.to_api_model()
 
 
 async def create_training(
@@ -34,17 +45,18 @@ async def create_training(
 
 async def patch_training(
     session: AsyncSession, author: int, id: int, training_patch: PatchTraining
-) -> Optional[Training]:
+) -> Training:
     """Updates the training's info"""
     async with session.begin():
         training = await session.get(DBTraining, id)
 
         if training is None:
-            return None
+            raise HTTPException(HTTPStatus.NOT_FOUND, "Resource not found")
 
-        # TODO: maybe handle this differently
         if training.author != author:
-            return None
+            raise HTTPException(
+                HTTPStatus.UNAUTHORIZED, "User isn't author of the training"
+            )
 
         training.update(**training_patch.dict())
 
