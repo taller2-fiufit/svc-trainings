@@ -1,9 +1,9 @@
 from http import HTTPStatus
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from fastapi import HTTPException
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import Select, select
 
 from src.api.model.training import CreateTraining, PatchTraining, Training
 from src.db.model.training import DBTraining
@@ -12,7 +12,7 @@ from src.db.model.training import DBTraining
 async def get_all_trainings(
     session: AsyncSession, offset: int, limit: int, user: Optional[int] = None
 ) -> List[Training]:
-    query = select(DBTraining)
+    query: Select[Tuple[DBTraining]] = select(DBTraining)
 
     if user is not None:
         query = query.filter_by(author=user)
@@ -59,6 +59,25 @@ async def patch_training(
             )
 
         training.update(**training_patch.dict())
+
+        session.add(training)
+
+    return training.to_api_model()
+
+
+async def change_block_status(
+    session: AsyncSession,
+    id: int,
+    new_block_status: bool,
+) -> Training:
+    """Updates the training's info"""
+    async with session.begin():
+        training = await session.get(DBTraining, id)
+
+        if training is None:
+            raise HTTPException(HTTPStatus.NOT_FOUND, "Resource not found")
+
+        training.blocked = new_block_status
 
         session.add(training)
 

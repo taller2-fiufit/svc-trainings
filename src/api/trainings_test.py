@@ -2,10 +2,16 @@ import pytest
 from typing import Any, AsyncGenerator
 from httpx import AsyncClient
 
-from src.auth import get_user, ignore_auth
+from src.auth import get_admin, get_user, ignore_auth
 from src.db.migration import downgrade_db
 from src.common.model import TrainingType
-from src.api.model.training import CreateTraining, Goal, Multimedia, Training
+from src.api.model.training import (
+    BlockStatus,
+    CreateTraining,
+    Goal,
+    Multimedia,
+    Training,
+)
 from src.main import app, lifespan
 from src.metrics.reports import get_reporter
 
@@ -17,6 +23,7 @@ async def client() -> AsyncGenerator[AsyncClient, None]:
 
     # https://fastapi.tiangolo.com/advanced/testing-dependencies/
     app.dependency_overrides[get_user] = ignore_auth
+    app.dependency_overrides[get_admin] = ignore_auth
 
     def stub_reporter(_: int) -> None:
         pass
@@ -97,6 +104,20 @@ async def test_trainings_post_get(
     response = await client.get(f"/trainings/{got.id}")
     assert response.status_code == 200
     assert got == Training(**response.json())
+
+
+async def test_trainings_block(
+    created_body: Training, client: AsyncClient
+) -> None:
+    assert not created_body.blocked
+
+    response = await client.patch(
+        f"/trainings/{created_body.id}/blocked",
+        json=BlockStatus(blocked=True).dict(),
+    )
+
+    assert response.status_code == 200
+    assert response.json()["blocked"]
 
 
 async def test_trainings_patch(
