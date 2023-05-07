@@ -1,9 +1,9 @@
 from http import HTTPStatus
-from typing import List, Optional, Tuple
+from typing import List, Optional
 from fastapi import HTTPException
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import Select, select
 
 from src.api.model.training import CreateTraining, PatchTraining, Training
 from src.db.model.training import DBTraining
@@ -12,7 +12,7 @@ from src.db.model.training import DBTraining
 async def get_all_trainings(
     session: AsyncSession, offset: int, limit: int, user: Optional[int] = None
 ) -> List[Training]:
-    query: Select[Tuple[DBTraining]] = select(DBTraining)
+    query = select(DBTraining)
 
     if user is not None:
         query = query.filter_by(author=user)
@@ -32,33 +32,47 @@ async def get_training_by_id(session: AsyncSession, id: int) -> Training:
     return training.to_api_model()
 
 
+async def check_title_is_unique(session: AsyncSession, title: str) -> None:
+    training = await session.scalar(select(DBTraining).filter_by(title=title))
+    if training is not None:
+        raise HTTPException(
+            HTTPStatus.CONFLICT,
+            f'A training with the title "{title}" already exists',
+        )
+
+
 async def create_training(
     session: AsyncSession, author: int, training: CreateTraining
 ) -> Training:
     new_training = DBTraining.from_api_model(author, training)
 
     async with session.begin():
+        await check_title_is_unique(session, training.title)  # type: ignore
         session.add(new_training)
 
     return new_training.to_api_model()
 
 
 async def patch_training(
-    session: AsyncSession, author: int, id: int, training_patch: PatchTraining
+    session: AsyncSession, author: int, id: int, patch: PatchTraining
 ) -> Training:
     """Updates the training's info"""
+
     async with session.begin():
         training = await session.get(DBTraining, id)
 
         if training is None:
             raise HTTPException(HTTPStatus.NOT_FOUND, "Resource not found")
 
+        if patch.title is not None and patch.title != training.title:
+            await check_title_is_unique(session, patch.title)
+
         if training.author != author:
             raise HTTPException(
                 HTTPStatus.UNAUTHORIZED, "User isn't author of the training"
             )
 
-        training.update(**training_patch.dict())
+        training.update(**patch.dict())
 
         session.add(training)
 
