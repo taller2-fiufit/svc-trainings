@@ -95,3 +95,10 @@ class Training(AllRequiredTrainingBase):
         title="Is blocked?",
         description="True if the training is blocked, false if it isn't",
     )
+
+
+class BlockStatus(BaseModel):
+    blocked: bool = Field(
+        title="Is blocked?",
+        description="True if the training is blocked, false if it isn't",
+    )

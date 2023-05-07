@@ -1,12 +1,17 @@
 from typing import Annotated, Callable, List
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-from src.api.model.training import CreateTraining, PatchTraining, Training
-from src.auth import User, get_user
+from src.api.model.training import (
+    BlockStatus,
+    CreateTraining,
+    PatchTraining,
+    Training,
+)
+from src.auth import User, get_admin, get_user
 from src.db.utils import get_session
 import src.db.trainings as trainings_db
 from src.metrics.reports import get_reporter
@@ -15,7 +20,7 @@ from src.metrics.reports import get_reporter
 router = APIRouter(
     prefix="/trainings",
     tags=["trainings"],
-    dependencies=[Depends(get_session), Depends(get_user)],
+    dependencies=[Depends(get_session), Depends(get_user), Depends(get_admin)],
 )
 
 
@@ -23,9 +28,17 @@ router = APIRouter(
 async def get_all_trainings(
     session: Annotated[AsyncSession, Depends(get_session)],
     user: Annotated[User, Depends(get_user)],
+    offset: int = 0,
+    limit: int = 100,
+    user_only: bool = False,
 ) -> List[Training]:
     """Get all trainings"""
-    return await trainings_db.get_all_trainings(session)
+    if user_only:
+        return await trainings_db.get_all_trainings(
+            session, offset, limit, user.sub
+        )
+    else:
+        return await trainings_db.get_all_trainings(session, offset, limit)
 
 
 @router.get("/{id}")
@@ -35,12 +48,7 @@ async def get_training(
     user: Annotated[User, Depends(get_user)],
 ) -> Training:
     """Get the training with the specified id"""
-    training = await trainings_db.get_training_by_id(session, id)
-
-    if training is None:
-        raise HTTPException(404, "Resource not found")
-
-    return training
+    return await trainings_db.get_training_by_id(session, id)
 
 
 @router.post("", status_code=201)
@@ -65,12 +73,20 @@ async def patch_training(
     session: Annotated[AsyncSession, Depends(get_session)],
     user: Annotated[User, Depends(get_user)],
 ) -> Training:
-    """Create a new training"""
-    training = await trainings_db.patch_training(
+    """Edit training's attributes"""
+    return await trainings_db.patch_training(
         session, user.sub, id, training_patch
     )
 
-    if training is None:
-        raise HTTPException(404, "Resource not found")
 
-    return training
+@router.patch("/{id}/blocked")
+async def block_training(
+    id: int,
+    block_status: BlockStatus,
+    session: Annotated[AsyncSession, Depends(get_session)],
+    admin: Annotated[User, Depends(get_admin)],
+) -> Training:
+    """Change training's blocked status"""
+    return await trainings_db.change_block_status(
+        session, id, block_status.blocked
+    )
