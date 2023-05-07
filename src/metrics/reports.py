@@ -16,9 +16,13 @@ class TrainingCreationReport(BaseModel):
     command: str = CMD_CREATED
     timeStamp: datetime
 
+    @classmethod
+    def from_now(cls) -> "TrainingCreationReport":
+        return TrainingCreationReport(timeStamp=datetime.now())
+
 
 def report_training_creation(id: int) -> None:
-    body = TrainingCreationReport(timeStamp=datetime.now()).json()
+    body = TrainingCreationReport.from_now().json()
 
     if QUEUE.url.endswith(".fifo"):
         # Send message with SQS FIFO-only parameters
