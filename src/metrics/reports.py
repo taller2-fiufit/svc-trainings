@@ -14,11 +14,11 @@ CMD_CREATED = "trainingCreated"
 class TrainingCreationReport(BaseModel):
     service: str = SERVICE_NAME
     command: str = CMD_CREATED
-    timeStamp: datetime
+    timestamp: datetime
 
     @classmethod
     def from_now(cls) -> "TrainingCreationReport":
-        return TrainingCreationReport(timeStamp=datetime.now())
+        return TrainingCreationReport(timestamp=datetime.now())
 
 
 def report_training_creation(id: int) -> None:
