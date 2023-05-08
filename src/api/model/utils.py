@@ -9,4 +9,6 @@ def make_all_required(cls: Type[BaseModel]) -> Type[BaseModel]:
     """Mark all fields of the class as required"""
     for field in cls.__fields__.values():
         field.required = True
+        field.allow_none = False
+
     return cls

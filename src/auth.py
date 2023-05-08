@@ -1,3 +1,4 @@
+from http import HTTPStatus
 import os
 from typing import Annotated
 from fastapi import Depends, HTTPException
@@ -19,6 +20,7 @@ oauth2_scheme = OAuth2PasswordBearer(
 class User(BaseModel):
     email: str
     sub: int
+    admin: bool
 
 
 async def get_user(token: Annotated[str, Depends(oauth2_scheme)]) -> User:
@@ -31,14 +33,25 @@ async def get_user(token: Annotated[str, Depends(oauth2_scheme)]) -> User:
             options={"verify_sub": False},
         )
     except (JWTError, ExpiredSignatureError, JWTClaimsError):
-        raise HTTPException(401, "Token is invalid or has expired")
+        raise HTTPException(
+            HTTPStatus.UNAUTHORIZED, "Token is invalid or has expired"
+        )
 
     return User(**user_info)
 
 
-DUMMY_USER = User(email="dummy@example.com", sub=1)
+async def get_admin(user: Annotated[User, Depends(get_user)]) -> User:
+    """Validates that the user is an admin, and returns the user"""
+    if not user.admin:
+        raise HTTPException(
+            HTTPStatus.FORBIDDEN, "Action requires admin permissions"
+        )
+    return user
+
+
+DUMMY_ADMIN = User(email="dummy@example.com", sub=1, admin=True)
 
 
 async def ignore_auth() -> User:
     """Used for tests without authentication"""
-    return DUMMY_USER
+    return DUMMY_ADMIN

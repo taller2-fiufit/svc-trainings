@@ -1,27 +1,74 @@
-from typing import Optional
-from pydantic import BaseModel, Field
+from typing import List, Optional
+from pydantic import BaseModel, ConstrainedStr, Field
 from src.api.model.utils import make_all_required
 
-from src.db.model.training import TrainingType
+from src.common.model import TrainingType
 
 
-class TrainingBase(BaseModel):
-    title: Optional[str] = Field(
-        title="The training's title", min_length=2, max_length=30, default=None
-    )
-    description: Optional[str] = Field(
-        title="The training's description", max_length=300, default=None
-    )
-    type: Optional[TrainingType] = Field(
-        title="The training's type", default=None
-    )
-    difficulty: Optional[int] = Field(
-        title="The training's difficulty", ge=0, le=10, default=None
-    )
-
+class OrmModel(BaseModel):
     # https://docs.pydantic.dev/usage/models/#orm-mode-aka-arbitrary-class-instances
     class Config:
         orm_mode = True
+
+
+# https://github.com/pydantic/pydantic/issues/156
+class Multimedia(ConstrainedStr):
+    max_length = 255
+    strip_whitespace = True
+
+    class Config:
+        orm_mode = True
+
+
+class Goal(OrmModel):
+    name: str = Field(
+        title="Name",
+        description="The goal's name",
+        min_length=1,
+        max_length=30,
+    )
+
+
+class TrainingBase(OrmModel):
+    title: Optional[str] = Field(
+        title="Title",
+        description="The training's main title",
+        min_length=2,
+        max_length=30,
+        default=None,
+    )
+    description: Optional[str] = Field(
+        title="Description",
+        description="The training's description",
+        max_length=300,
+        default=None,
+    )
+    type: Optional[TrainingType] = Field(
+        title="Type",
+        description="The training's type. If it is a walk, is running, etc.",
+        default=None,
+    )
+    difficulty: Optional[int] = Field(
+        title="Difficulty",
+        description="The training's difficulty",
+        ge=0,
+        le=10,
+        default=None,
+    )
+    multimedia: Optional[List[Multimedia]] = Field(
+        title="Multimedia resources",
+        description="The training's multimedia resources (images or videos)",
+        max_items=64,
+        default=None,
+    )
+    goals: Optional[List[Goal]] = Field(
+        title="Goals",
+        description="The training's goals. "
+        "This should be fulfilled to complete the training plan",
+        max_items=64,
+        unique_items=True,
+        default=None,
+    )
 
 
 class AllRequiredTrainingBase(TrainingBase):
@@ -40,4 +87,18 @@ class PatchTraining(TrainingBase):
 
 
 class Training(AllRequiredTrainingBase):
-    id: int = Field(title="The training's id")
+    id: int = Field(title="Title", description="The training's id")
+    author: int = Field(
+        title="Author's id", description="The training author's id"
+    )
+    blocked: bool = Field(
+        title="Is blocked?",
+        description="True if the training is blocked, false if it isn't",
+    )
+
+
+class BlockStatus(BaseModel):
+    blocked: bool = Field(
+        title="Is blocked?",
+        description="True if the training is blocked, false if it isn't",
+    )

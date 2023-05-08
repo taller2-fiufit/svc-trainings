@@ -13,6 +13,7 @@ mypy:
 	poetry run mypy --strict src alembic
 
 test:
+	rm local.db 2> /dev/null || true
 	poetry run pytest -sv .
 	rm local.db 2> /dev/null || true
 
