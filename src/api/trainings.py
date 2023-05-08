@@ -1,4 +1,4 @@
-from typing import Annotated, Callable, List
+from typing import Annotated, Callable, List, Optional, Union, Literal
 
 from fastapi import APIRouter, Depends
 
@@ -30,15 +30,14 @@ async def get_all_trainings(
     user: Annotated[User, Depends(get_user)],
     offset: int = 0,
     limit: int = 100,
-    user_only: bool = False,
+    author: Optional[Union[Literal["me"], int]] = None,
 ) -> List[Training]:
     """Get all trainings"""
-    if user_only:
-        return await trainings_db.get_all_trainings(
-            session, offset, limit, user.sub
-        )
-    else:
+    if author is None:
         return await trainings_db.get_all_trainings(session, offset, limit)
+
+    u = user.sub if author == "me" else author
+    return await trainings_db.get_all_trainings(session, offset, limit, u)
 
 
 @router.get("/{id}")
