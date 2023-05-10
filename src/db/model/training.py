@@ -128,4 +128,7 @@ class DBTraining(Base):
         if multimedia is not None:
             self.multimedia = [DBMultimedia(url=m) for m in multimedia]
         if goals is not None:
-            self.goals = [DBGoal(name=g["name"]) for g in goals]
+            self.goals = [
+                DBGoal(name=g["name"], description=g["description"])
+                for g in goals
+            ]

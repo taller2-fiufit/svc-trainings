@@ -11,6 +11,7 @@ from src.api.model.training import (
     CreateTraining,
     Goal,
     Multimedia,
+    PatchTraining,
     Training,
 )
 from src.main import app, lifespan
@@ -55,7 +56,7 @@ async def created_body(client: AsyncClient) -> Training:
         type=TrainingType.WALK,
         difficulty=1,
         multimedia=[Multimedia("image_url"), Multimedia("video_url")],
-        goals=[Goal(name="goal_1")],
+        goals=[Goal(name="goal_1", description="a _veeery_ long description")],
     )
 
     response = await client.post("/trainings", json=body.dict())
@@ -138,9 +139,10 @@ async def test_trainings_patch(
 ) -> None:
     created_body.description = "new description"
     created_body.type = TrainingType.WALK
+    body = PatchTraining(**created_body.dict())
 
     response = await client.patch(
-        f"/trainings/{created_body.id}", json=created_body.dict()
+        f"/trainings/{created_body.id}", json=body.dict()
     )
     assert response.status_code == HTTPStatus.OK
 
@@ -201,10 +203,16 @@ async def test_trainings_invalid_body(
 
     # too short/long goal name
     await assert_invalid(
-        {**body.dict(), "goals": [{"name": ""}]},
+        {**body.dict(), "goals": [{"name": "", "description": ""}]},
         client,
     )
     await assert_invalid(
-        {**body.dict(), "goals": [{"name": "a" * 31}]},
+        {**body.dict(), "goals": [{"name": "a" * 31, "description": ""}]},
+        client,
+    )
+
+    # too long goal description
+    await assert_invalid(
+        {**body.dict(), "goals": [{"name": "name", "description": "a" * 301}]},
         client,
     )
