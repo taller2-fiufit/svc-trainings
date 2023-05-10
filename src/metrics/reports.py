@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Callable
+from typing import Callable
 
 from pydantic import BaseModel
 from src.api.model.training import Training
