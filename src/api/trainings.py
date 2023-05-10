@@ -54,14 +54,16 @@ async def get_training(
 async def post_training(
     training: CreateTraining,
     session: Annotated[AsyncSession, Depends(get_session)],
-    report_creation: Annotated[Callable[[int], None], Depends(get_reporter)],
+    report_creation: Annotated[
+        Callable[[Training], None], Depends(get_reporter)
+    ],
     user: Annotated[User, Depends(get_user)],
 ) -> Training:
     """Create a new training"""
     new_training = await trainings_db.create_training(
         session, user.sub, training
     )
-    report_creation(new_training.id)
+    report_creation(new_training)
     return new_training
 
 

@@ -26,7 +26,7 @@ async def client() -> AsyncGenerator[AsyncClient, None]:
     app.dependency_overrides[get_user] = ignore_auth
     app.dependency_overrides[get_admin] = ignore_auth
 
-    def stub_reporter(_: int) -> None:
+    def stub_reporter(_: Training) -> None:
         pass
 
     app.dependency_overrides[get_reporter] = lambda: stub_reporter
