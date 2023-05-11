@@ -20,14 +20,20 @@ from src.metrics.reports import get_reporter
 router = APIRouter(
     prefix="/trainings",
     tags=["trainings"],
-    dependencies=[Depends(get_session), Depends(get_user), Depends(get_admin)],
+    # List of dependencies that get run ALWAYS. For a single-route dependency use
+    # the route decorator's parameter "dependencies"
+    dependencies=[Depends(get_session), Depends(get_user)],
 )
+
+SessionDep = Annotated[AsyncSession, Depends(get_session)]
+ReporterDep = Annotated[Callable[[Training], None], Depends(get_reporter)]
+UserDep = Annotated[User, Depends(get_user)]
 
 
 @router.get("")
 async def get_all_trainings(
-    session: Annotated[AsyncSession, Depends(get_session)],
-    user: Annotated[User, Depends(get_user)],
+    session: SessionDep,
+    user: UserDep,
     offset: int = 0,
     limit: int = 100,
     author: Optional[Union[Literal["me"], int]] = None,
@@ -41,23 +47,17 @@ async def get_all_trainings(
 
 
 @router.get("/{id}")
-async def get_training(
-    id: int,
-    session: Annotated[AsyncSession, Depends(get_session)],
-    user: Annotated[User, Depends(get_user)],
-) -> Training:
+async def get_training(session: SessionDep, id: int) -> Training:
     """Get the training with the specified id"""
     return await trainings_db.get_training_by_id(session, id)
 
 
 @router.post("", status_code=201)
 async def post_training(
+    session: SessionDep,
+    user: UserDep,
+    report_creation: ReporterDep,
     training: CreateTraining,
-    session: Annotated[AsyncSession, Depends(get_session)],
-    report_creation: Annotated[
-        Callable[[Training], None], Depends(get_reporter)
-    ],
-    user: Annotated[User, Depends(get_user)],
 ) -> Training:
     """Create a new training"""
     new_training = await trainings_db.create_training(
@@ -69,10 +69,10 @@ async def post_training(
 
 @router.patch("/{id}")
 async def patch_training(
+    session: SessionDep,
+    user: UserDep,
     id: int,
     training_patch: PatchTraining,
-    session: Annotated[AsyncSession, Depends(get_session)],
-    user: Annotated[User, Depends(get_user)],
 ) -> Training:
     """Edit training's attributes"""
     return await trainings_db.patch_training(
@@ -80,12 +80,11 @@ async def patch_training(
     )
 
 
-@router.patch("/{id}/blocked")
+@router.patch("/{id}/blocked", dependencies=[Depends(get_admin)])
 async def block_training(
+    session: SessionDep,
     id: int,
     block_status: BlockStatus,
-    session: Annotated[AsyncSession, Depends(get_session)],
-    admin: Annotated[User, Depends(get_admin)],
 ) -> Training:
     """Change training's blocked status"""
     return await trainings_db.change_block_status(
