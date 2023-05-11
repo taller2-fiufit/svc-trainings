@@ -28,7 +28,7 @@ origins_regex = re.compile(
     (
         r"https?:\/\/"  # http:// or https://
         r"(localhost(:[0-9]*)?|"  # localhost, localhost:$PORT or ...
-        r"[\w\.]*(megaredhand|fedecolangelo)\.cloud\.okteto\.net)"  # okteto
+        r"[\w\.-]*(megaredhand|fedecolangelo)\.cloud\.okteto\.net)"  # okteto
     )
 )
 
