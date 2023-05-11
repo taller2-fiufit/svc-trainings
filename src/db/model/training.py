@@ -1,5 +1,13 @@
 from typing import Dict, List, Optional
-from sqlalchemy import Boolean, ForeignKey, Integer, String, Enum
+from sqlalchemy import (
+    Boolean,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Enum,
+    func,
+)
 from sqlalchemy.orm import Mapped, relationship, mapped_column
 from src.api.model.training import CreateTraining, Goal, Multimedia, Training
 
@@ -31,14 +39,15 @@ class DBGoal(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     training_id: Mapped[int] = mapped_column(ForeignKey("trainings.id"))
     name: Mapped[str] = mapped_column(String(30))
+    description: Mapped[str] = mapped_column(String(300))
 
 
 def goals_api_to_db(goals: List[Goal]) -> List[DBGoal]:
-    return [DBGoal(name=g.name) for g in goals]
+    return [DBGoal(name=g.name, description=g.description) for g in goals]
 
 
 def goals_db_to_api(db_goals: List[DBGoal]) -> List[Goal]:
-    return [Goal(name=g.name) for g in db_goals]
+    return [Goal(name=g.name, description=g.description) for g in db_goals]
 
 
 class DBTraining(Base):
@@ -47,8 +56,9 @@ class DBTraining(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     author: Mapped[int] = mapped_column(Integer)
     blocked: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[str] = mapped_column(DateTime, default=func.now())
     title: Mapped[str] = mapped_column(String(30), index=True, unique=True)
-    description: Mapped[str] = mapped_column(String(500))
+    description: Mapped[str] = mapped_column(String(300))
     type: Mapped[TrainingType] = mapped_column(Enum(TrainingType))
     difficulty: Mapped[int] = mapped_column(Integer)
     multimedia: Mapped[List[DBMultimedia]] = relationship(
@@ -88,6 +98,7 @@ class DBTraining(Base):
             id=self.id,
             author=self.author,
             blocked=self.blocked,
+            created_at=self.created_at,  # type:ignore
             title=self.title,
             description=self.description,
             type=self.type,
@@ -117,4 +128,7 @@ class DBTraining(Base):
         if multimedia is not None:
             self.multimedia = [DBMultimedia(url=m) for m in multimedia]
         if goals is not None:
-            self.goals = [DBGoal(name=g["name"]) for g in goals]
+            self.goals = [
+                DBGoal(name=g["name"], description=g["description"])
+                for g in goals
+            ]

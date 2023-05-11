@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List, Optional
 from pydantic import BaseModel, ConstrainedStr, Field
 from src.api.model.utils import make_all_required
@@ -6,9 +7,11 @@ from src.common.model import TrainingType
 
 
 class OrmModel(BaseModel):
-    # https://docs.pydantic.dev/usage/models/#orm-mode-aka-arbitrary-class-instances
     class Config:
+        # https://docs.pydantic.dev/usage/models/#orm-mode-aka-arbitrary-class-instances
         orm_mode = True
+        # https://stackoverflow.com/questions/69433904/assigning-pydantic-fields-not-by-alias
+        allow_population_by_field_name = True
 
 
 # https://github.com/pydantic/pydantic/issues/156
@@ -26,6 +29,12 @@ class Goal(OrmModel):
         description="The goal's name",
         min_length=1,
         max_length=30,
+    )
+    description: str = Field(
+        title="Description",
+        description="The goal's description",
+        max_length=300,
+        default=None,
     )
 
 
@@ -94,6 +103,11 @@ class Training(AllRequiredTrainingBase):
     blocked: bool = Field(
         title="Is blocked?",
         description="True if the training is blocked, false if it isn't",
+    )
+    created_at: datetime = Field(
+        title="Time of creation",
+        description="The timestamp of this training's creation",
+        alias="createdAt",
     )
 
 
