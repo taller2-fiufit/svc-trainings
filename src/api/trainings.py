@@ -6,6 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 
 from src.api.model.training import (
+    MAX_DIFFICULTY,
+    MIN_DIFFICULTY,
     BlockStatus,
     CreateTraining,
     PatchTraining,
@@ -37,13 +39,19 @@ async def get_all_trainings(
     offset: int = 0,
     limit: int = 100,
     author: Optional[Union[Literal["me"], int]] = None,
+    mindiff: int = MIN_DIFFICULTY,
+    maxdiff: int = MAX_DIFFICULTY + 1,
 ) -> List[Training]:
     """Get all trainings"""
     if author is None:
-        return await trainings_db.get_all_trainings(session, offset, limit)
+        return await trainings_db.get_all_trainings(
+            session, offset, limit, mindiff, maxdiff
+        )
 
     u = user.sub if author == "me" else author
-    return await trainings_db.get_all_trainings(session, offset, limit, u)
+    return await trainings_db.get_all_trainings(
+        session, offset, limit, u, mindiff, maxdiff
+    )
 
 
 @router.get("/{id}")

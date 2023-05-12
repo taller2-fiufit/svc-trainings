@@ -10,12 +10,21 @@ from src.db.model.training import DBTraining
 
 
 async def get_all_trainings(
-    session: AsyncSession, offset: int, limit: int, user: Optional[int] = None
+    session: AsyncSession,
+    offset: int,
+    limit: int,
+    mindiff: int,
+    maxdiff: int,
+    user: Optional[int] = None,
 ) -> List[Training]:
     query = select(DBTraining)
 
     if user is not None:
         query = query.filter_by(author=user)
+
+    query = query.filter(
+        DBTraining.difficulty >= mindiff, DBTraining.difficulty < maxdiff
+    )
 
     res = await session.scalars(query.offset(offset).limit(limit))
     trainings = res.all()
