@@ -6,6 +6,10 @@ from src.api.model.utils import make_all_required
 from src.common.model import TrainingType
 
 
+MIN_DIFFICULTY = 0
+MAX_DIFFICULTY = 10
+
+
 class OrmModel(BaseModel):
     class Config:
         # https://docs.pydantic.dev/usage/models/#orm-mode-aka-arbitrary-class-instances
@@ -60,8 +64,8 @@ class TrainingBase(OrmModel):
     difficulty: Optional[int] = Field(
         title="Difficulty",
         description="The training's difficulty",
-        ge=0,
-        le=10,
+        ge=MIN_DIFFICULTY,
+        le=MAX_DIFFICULTY,
         default=None,
     )
     multimedia: Optional[List[Multimedia]] = Field(
