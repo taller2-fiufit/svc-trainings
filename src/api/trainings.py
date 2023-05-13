@@ -88,7 +88,7 @@ async def patch_training(
     )
 
 
-@router.patch("/{id}/blocked", dependencies=[Depends(get_admin)])
+@router.patch("/{id}/status", dependencies=[Depends(get_admin)])
 async def block_training(
     session: SessionDep,
     id: int,

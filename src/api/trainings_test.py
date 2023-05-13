@@ -126,7 +126,7 @@ async def test_trainings_block(
     assert not created_body.blocked
 
     response = await client.patch(
-        f"/trainings/{created_body.id}/blocked",
+        f"/trainings/{created_body.id}/status",
         json=BlockStatus(blocked=True).dict(),
     )
 
