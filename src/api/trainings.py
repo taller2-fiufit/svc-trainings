@@ -16,6 +16,7 @@ from src.api.model.training import (
 from src.auth import User, get_admin, get_user
 from src.db.utils import get_session
 import src.db.trainings as trainings_db
+from src.logging import info
 from src.metrics.reports import get_reporter
 
 
@@ -71,6 +72,7 @@ async def post_training(
     new_training = await trainings_db.create_training(
         session, user.sub, training
     )
+    info(f"New training created: {new_training}")
     report_creation(new_training)
     return new_training
 
@@ -83,9 +85,11 @@ async def patch_training(
     training_patch: PatchTraining,
 ) -> Training:
     """Edit training's attributes"""
-    return await trainings_db.patch_training(
+    edited_training = await trainings_db.patch_training(
         session, user.sub, id, training_patch
     )
+    info(f"Training edited: {edited_training}")
+    return edited_training
 
 
 @router.patch("/{id}/status", dependencies=[Depends(get_admin)])
@@ -95,6 +99,11 @@ async def block_training(
     block_status: BlockStatus,
 ) -> Training:
     """Change training's blocked status"""
-    return await trainings_db.change_block_status(
+    edited_training = await trainings_db.change_block_status(
         session, id, block_status.blocked
     )
+    status = "blocked" if edited_training.blocked else "unblocked"
+    info(
+        f"Training block status changed. ID: {edited_training.id}  Current status: {status}"
+    )
+    return edited_training
