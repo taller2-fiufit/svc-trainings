@@ -105,6 +105,7 @@ class DBTraining(Base):
             difficulty=self.difficulty,
             multimedia=multimedia,
             goals=goals,
+            score=0.0,
         )
 
     def update(

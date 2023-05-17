@@ -113,6 +113,10 @@ class Training(AllRequiredTrainingBase):
         description="The timestamp of this training's creation",
         alias="createdAt",
     )
+    score: float = Field(
+        title="Average score",
+        description="Average score of training",
+    )
 
 
 class BlockStatus(BaseModel):
