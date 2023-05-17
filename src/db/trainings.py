@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.model.training import CreateTraining, PatchTraining, Training
-from src.db.model.training import DBTraining
+from src.db.model.training import DBScore, DBTraining
 
 
 async def get_all_trainings(
@@ -105,3 +105,23 @@ async def change_block_status(
         session.add(training)
 
     return training.to_api_model()
+
+
+async def add_score(
+    session: AsyncSession,
+    id: int,
+    user: int,
+    score: int,
+) -> None:
+    """Adds a new score to the given training"""
+    async with session.begin():
+        training = await session.get(DBTraining, id)
+
+        if training is None:
+            raise HTTPException(HTTPStatus.NOT_FOUND, "Resource not found")
+
+        new_score = DBScore(training_id=id, author=user, score=score)
+
+        training.scores.append(new_score)
+
+        session.add(training)

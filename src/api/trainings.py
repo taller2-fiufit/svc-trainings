@@ -11,6 +11,7 @@ from src.api.model.training import (
     BlockStatus,
     CreateTraining,
     PatchTraining,
+    ScoreBody,
     Training,
 )
 from src.auth import User, get_admin, get_user
@@ -108,3 +109,12 @@ async def block_training(
         f"  Current status: {status}"
     )
     return edited_training
+
+
+@router.post("/{id}/score")
+async def post_score(
+    session: SessionDep, user: UserDep, id: int, score: ScoreBody
+) -> ScoreBody:
+    """Change training's blocked status"""
+    await trainings_db.add_score(session, id, user.sub, score.score)
+    return score
