@@ -104,6 +104,7 @@ async def block_training(
     )
     status = "blocked" if edited_training.blocked else "unblocked"
     info(
-        f"Training block status changed. ID: {edited_training.id}  Current status: {status}"
+        f"Training block status changed. ID: {edited_training.id}"
+        f"  Current status: {status}"
     )
     return edited_training
