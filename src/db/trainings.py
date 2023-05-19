@@ -117,35 +117,7 @@ async def add_score(
     user: int,
     score: int,
 ) -> None:
-    """Adds a new score to the given training"""
-    async with session.begin():
-        training = await session.get(DBTraining, id)
-
-        if training is None:
-            raise HTTPException(HTTPStatus.NOT_FOUND, "Training not found")
-
-        old_score = await session.scalar(
-            select(DBScore).filter_by(training_id=id, author=user).limit(1)
-        )
-
-        if old_score is not None:
-            raise HTTPException(
-                HTTPStatus.CONFLICT,
-                "A score for the training already exists",
-            )
-
-        new_score = DBScore(training_id=id, author=user, score=score)
-
-        session.add(new_score)
-
-
-async def edit_score(
-    session: AsyncSession,
-    id: int,
-    user: int,
-    score: int,
-) -> None:
-    """Adds a new score to the given training"""
+    """Adds a new score to the given training, or edits existing ones"""
     async with session.begin():
         training = await session.get(DBTraining, id)
 
@@ -157,8 +129,8 @@ async def edit_score(
         )
 
         if db_score is None:
-            raise HTTPException(HTTPStatus.NOT_FOUND, "Score not found")
-
-        db_score.score = score
+            db_score = DBScore(training_id=id, author=user, score=score)
+        else:
+            db_score.score = score
 
         session.add(db_score)

@@ -119,12 +119,3 @@ async def post_score(
     """Change training's blocked status"""
     await trainings_db.add_score(session, id, user.sub, score.score)
     return score
-
-
-@router.patch("/{id}/scores")
-async def patch_score(
-    session: SessionDep, user: UserDep, id: int, score: ScoreBody
-) -> ScoreBody:
-    """Change training's blocked status"""
-    await trainings_db.edit_score(session, id, user.sub, score.score)
-    return score

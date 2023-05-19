@@ -261,11 +261,11 @@ async def test_post_score(
     pass
 
 
-async def test_patch_score(
+async def test_edit_score(
     scored_training: Training, client: AsyncClient
 ) -> None:
     new_score = (int(scored_training.score) + 1) % 5
-    response = await client.patch(
+    response = await client.post(
         f"/trainings/{scored_training.id}/scores",
         json={"score": new_score},
     )
