@@ -232,7 +232,19 @@ async def posted_score(created_body: Training, client: AsyncClient) -> int:
     assert response.status_code == HTTPStatus.CREATED
     assert response.json() == {"score": score}
 
+    await assert_score_is(client, score, 1, created_body.id)
+
     return score
+
+
+async def assert_score_is(
+    client: AsyncClient, score: int, score_amount: int, training_id: int
+) -> None:
+    response = await client.get(f"/trainings/{training_id}")
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json()["score"] == score
+    assert response.json()["score_amount"] == score_amount
 
 
 async def test_post_score(
@@ -252,3 +264,5 @@ async def test_patch_score(
 
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {"score": new_score}
+
+    await assert_score_is(client, new_score, 1, created_body.id)

@@ -109,9 +109,12 @@ class DBTraining(Base):
         multimedia = multimedia_db_to_api(self.multimedia)
         goals = goals_db_to_api(self.goals)
 
-        score = 0.0
-        score_amount = 0
-        # TODO: add score calculation
+        score_amount = len(self.scores)
+
+        if score_amount == 0:
+            score = 0.0
+        else:
+            score = sum((s.score for s in self.scores)) / score_amount
 
         return Training(
             id=self.id,
