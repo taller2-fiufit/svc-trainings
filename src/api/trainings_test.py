@@ -270,7 +270,7 @@ async def test_edit_score(
         json={"score": new_score},
     )
 
-    assert response.status_code == HTTPStatus.OK
+    assert response.status_code == HTTPStatus.CREATED
     assert response.json() == {"score": new_score}
 
     await assert_score_is(client, new_score, 1, scored_training.id)
