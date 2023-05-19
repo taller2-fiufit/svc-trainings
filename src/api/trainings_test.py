@@ -224,7 +224,9 @@ async def test_trainings_invalid_body(
 
 
 @pytest.fixture
-async def posted_score(created_body: Training, client: AsyncClient) -> int:
+async def scored_training(
+    created_body: Training, client: AsyncClient
+) -> Training:
     score = 2
     response = await client.post(
         f"/trainings/{created_body.id}/scores", json={"score": score}
@@ -234,7 +236,12 @@ async def posted_score(created_body: Training, client: AsyncClient) -> int:
 
     await assert_score_is(client, score, 1, created_body.id)
 
-    return score
+    response = await client.get(f"/trainings/{created_body.id}")
+
+    created_body.score = score
+    created_body.score_amount = 1
+
+    return created_body
 
 
 async def assert_score_is(
@@ -248,21 +255,22 @@ async def assert_score_is(
 
 
 async def test_post_score(
-    posted_score: int, created_body: Training, client: AsyncClient
+    scored_training: Training, client: AsyncClient
 ) -> None:
     # NOTE: all checks are located inside the posted_score fixture
     pass
 
 
 async def test_patch_score(
-    posted_score: int, created_body: Training, client: AsyncClient
+    scored_training: Training, client: AsyncClient
 ) -> None:
-    new_score = (posted_score + 1) % 5
+    new_score = (int(scored_training.score) + 1) % 5
     response = await client.patch(
-        f"/trainings/{created_body.id}/scores", json={"score": new_score}
+        f"/trainings/{scored_training.id}/scores",
+        json={"score": new_score},
     )
 
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {"score": new_score}
 
-    await assert_score_is(client, new_score, 1, created_body.id)
+    await assert_score_is(client, new_score, 1, scored_training.id)
