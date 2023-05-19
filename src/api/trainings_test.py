@@ -216,3 +216,39 @@ async def test_trainings_invalid_body(
         {**body.dict(), "goals": [{"name": "name", "description": "a" * 301}]},
         client,
     )
+
+
+# ------
+# SCORES
+# ------
+
+
+@pytest.fixture
+async def posted_score(created_body: Training, client: AsyncClient) -> int:
+    score = 2
+    response = await client.post(
+        f"/trainings/{created_body.id}/scores", json={"score": score}
+    )
+    assert response.status_code == HTTPStatus.CREATED
+    assert response.json() == {"score": score}
+
+    return score
+
+
+async def test_post_score(
+    posted_score: int, created_body: Training, client: AsyncClient
+) -> None:
+    # NOTE: all checks are located inside the posted_score fixture
+    pass
+
+
+async def test_patch_score(
+    posted_score: int, created_body: Training, client: AsyncClient
+) -> None:
+    new_score = (posted_score + 1) % 5
+    response = await client.patch(
+        f"/trainings/{created_body.id}/scores", json={"score": new_score}
+    )
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {"score": new_score}

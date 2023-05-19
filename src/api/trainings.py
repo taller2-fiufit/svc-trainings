@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from typing import Annotated, Callable, List, Optional, Union, Literal
 
 from fastapi import APIRouter, Depends
@@ -62,7 +63,7 @@ async def get_training(session: SessionDep, id: int) -> Training:
     return await trainings_db.get_training_by_id(session, id)
 
 
-@router.post("", status_code=201)
+@router.post("", status_code=HTTPStatus.CREATED)
 async def post_training(
     session: SessionDep,
     user: UserDep,
@@ -111,10 +112,19 @@ async def block_training(
     return edited_training
 
 
-@router.post("/{id}/score")
+@router.post("/{id}/scores", status_code=HTTPStatus.CREATED)
 async def post_score(
     session: SessionDep, user: UserDep, id: int, score: ScoreBody
 ) -> ScoreBody:
     """Change training's blocked status"""
     await trainings_db.add_score(session, id, user.sub, score.score)
+    return score
+
+
+@router.patch("/{id}/scores")
+async def patch_score(
+    session: SessionDep, user: UserDep, id: int, score: ScoreBody
+) -> ScoreBody:
+    """Change training's blocked status"""
+    await trainings_db.edit_score(session, id, user.sub, score.score)
     return score
