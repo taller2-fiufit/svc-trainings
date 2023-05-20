@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Annotated, Callable, List, Optional, Union, Literal
+from typing import Annotated, Callable, List
 
 from fastapi import APIRouter, Depends
 
@@ -7,10 +7,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 
 from src.api.model.training import (
-    MAX_DIFFICULTY,
-    MIN_DIFFICULTY,
     BlockStatus,
     CreateTraining,
+    FilterParams,
     PatchTraining,
     ScoreBody,
     Training,
@@ -33,27 +32,19 @@ router = APIRouter(
 SessionDep = Annotated[AsyncSession, Depends(get_session)]
 ReporterDep = Annotated[Callable[[Training], None], Depends(get_reporter)]
 UserDep = Annotated[User, Depends(get_user)]
+Filters = Annotated[FilterParams, Depends()]
 
 
 @router.get("")
 async def get_all_trainings(
     session: SessionDep,
     user: UserDep,
-    offset: int = 0,
-    limit: int = 100,
-    author: Optional[Union[Literal["me"], int]] = None,
-    mindiff: int = MIN_DIFFICULTY,
-    maxdiff: int = MAX_DIFFICULTY + 1,
+    f: Filters,
 ) -> List[Training]:
     """Get all trainings"""
-    if author is None:
-        return await trainings_db.get_all_trainings(
-            session, offset, limit, mindiff, maxdiff
-        )
-
-    u = user.sub if author == "me" else author
+    sub = user.sub if f.author == "me" else f.author
     return await trainings_db.get_all_trainings(
-        session, offset, limit, u, mindiff, maxdiff
+        session, f.offset, f.limit, f.mindiff, f.maxdiff, f.blocked, user=sub
     )
 
 
