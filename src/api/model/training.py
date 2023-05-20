@@ -71,7 +71,7 @@ class TrainingBase(OrmModel):
     multimedia: Optional[List[Multimedia]] = Field(
         title="Multimedia resources",
         description="The training's multimedia resources (images or videos)",
-        max_items=64,
+        max_items=8,
         default=None,
     )
     goals: Optional[List[Goal]] = Field(
