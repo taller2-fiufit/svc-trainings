@@ -190,7 +190,7 @@ async def test_trainings_invalid_body(
     await assert_invalid({**body.dict(), "difficulty": "-1"}, client)
 
     # too many multimedia resources
-    await assert_invalid({**body.dict(), "multimedia": ["url"] * 65}, client)
+    await assert_invalid({**body.dict(), "multimedia": ["url"] * 9}, client)
 
     # too long multimedia url
     await assert_invalid({**body.dict(), "multimedia": ["a" * 256]}, client)
