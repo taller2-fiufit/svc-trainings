@@ -223,11 +223,21 @@ async def test_trainings_invalid_body(
 # ------
 
 
+async def assert_score_is(
+    client: AsyncClient, score: float, score_amount: int, training_id: int
+) -> None:
+    response = await client.get(f"/trainings/{training_id}")
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json()["score"] == score
+    assert response.json()["score_amount"] == score_amount
+
+
 @pytest.fixture
 async def scored_training(
     created_body: Training, client: AsyncClient
 ) -> Training:
-    score = 2
+    score = 2.3
     response = await client.post(
         f"/trainings/{created_body.id}/scores", json={"score": score}
     )
@@ -244,16 +254,6 @@ async def scored_training(
     return created_body
 
 
-async def assert_score_is(
-    client: AsyncClient, score: int, score_amount: int, training_id: int
-) -> None:
-    response = await client.get(f"/trainings/{training_id}")
-
-    assert response.status_code == HTTPStatus.OK
-    assert response.json()["score"] == score
-    assert response.json()["score_amount"] == score_amount
-
-
 async def test_post_score(
     scored_training: Training, client: AsyncClient
 ) -> None:
@@ -264,7 +264,7 @@ async def test_post_score(
 async def test_edit_score(
     scored_training: Training, client: AsyncClient
 ) -> None:
-    new_score = (int(scored_training.score) + 1) % 5
+    new_score = float((int(scored_training.score) + 2) % 5)
     response = await client.post(
         f"/trainings/{scored_training.id}/scores",
         json={"score": new_score},

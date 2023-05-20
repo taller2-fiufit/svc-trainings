@@ -112,10 +112,18 @@ async def block_training(
     return edited_training
 
 
+@router.get("/{id}/scores/me", status_code=HTTPStatus.OK)
+async def get_score_me(
+    session: SessionDep, user: UserDep, id: int
+) -> ScoreBody:
+    """Get your score for the training"""
+    return await trainings_db.get_score(session, id, user.sub)
+
+
 @router.post("/{id}/scores", status_code=HTTPStatus.CREATED)
 async def post_score(
     session: SessionDep, user: UserDep, id: int, score: ScoreBody
 ) -> ScoreBody:
-    """Change training's blocked status"""
+    """Create or update a score"""
     await trainings_db.add_score(session, id, user.sub, score.score)
     return score

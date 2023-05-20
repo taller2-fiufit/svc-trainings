@@ -2,6 +2,7 @@ from typing import Dict, List, Optional
 from sqlalchemy import (
     Boolean,
     DateTime,
+    Float,
     ForeignKey,
     Integer,
     String,
@@ -48,7 +49,7 @@ class DBScore(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     training_id: Mapped[int] = mapped_column(ForeignKey("trainings.id"))
     author: Mapped[int] = mapped_column(Integer)
-    score: Mapped[int] = mapped_column(Integer)
+    score: Mapped[float] = mapped_column(Float)
 
 
 def goals_api_to_db(goals: List[Goal]) -> List[DBGoal]:
