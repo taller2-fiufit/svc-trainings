@@ -1,5 +1,5 @@
 import pytest
-from typing import Any, AsyncGenerator
+from typing import Any, AsyncGenerator, Dict
 from httpx import AsyncClient
 from http import HTTPStatus
 
@@ -153,6 +153,42 @@ async def test_trainings_patch(
     response = await client.get(f"/trainings/{got.id}")
     assert response.status_code == HTTPStatus.OK
     assert got == Training(**response.json())
+
+
+async def test_filter_trainings(
+    created_body: Training, client: AsyncClient
+) -> None:
+    created_body.blocked = True
+    block_status = BlockStatus(blocked=True)
+    response = await client.patch(
+        f"/trainings/{created_body.id}/status", json=block_status.dict()
+    )
+    assert response.status_code == HTTPStatus.OK
+
+    response = await client.get("/trainings")
+    assert response.status_code == HTTPStatus.OK
+    assert len(response.json()) == 0
+
+    params: Dict[str, Any] = {"blocked": False}
+    response = await client.get("/trainings", params=params)
+    assert response.status_code == HTTPStatus.OK
+    assert len(response.json()) == 0
+
+    params["blocked"] = True
+    response = await client.get("/trainings", params=params)
+    assert response.status_code == HTTPStatus.OK
+    assert len(response.json()) == 1
+
+    params["mindiff"] = created_body.difficulty
+    response = await client.get("/trainings", params=params)
+    assert response.status_code == HTTPStatus.OK
+    assert len(response.json()) == 1
+
+    assert created_body.difficulty is not None  # for mypy
+    params["mindiff"] = created_body.difficulty + 1
+    response = await client.get("/trainings", params=params)
+    assert response.status_code == HTTPStatus.OK
+    assert len(response.json()) == 0
 
 
 async def assert_invalid(body: dict[str, Any], client: AsyncClient) -> None:
