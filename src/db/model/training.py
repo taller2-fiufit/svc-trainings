@@ -2,7 +2,6 @@ from typing import Dict, List, Optional
 from sqlalchemy import (
     Boolean,
     DateTime,
-    Float,
     ForeignKey,
     Integer,
     String,
@@ -14,6 +13,9 @@ from src.api.model.training import CreateTraining, Goal, Multimedia, Training
 
 from src.common.model import TrainingType
 from src.db.model.base import Base
+
+
+SCORE_SCALE: int = 100
 
 
 class DBMultimedia(Base):
@@ -43,21 +45,35 @@ class DBGoal(Base):
     description: Mapped[str] = mapped_column(String(300))
 
 
-class DBScore(Base):
-    __tablename__ = "training_scores"
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    training_id: Mapped[int] = mapped_column(ForeignKey("trainings.id"))
-    author: Mapped[int] = mapped_column(Integer)
-    score: Mapped[float] = mapped_column(Float)
-
-
 def goals_api_to_db(goals: List[Goal]) -> List[DBGoal]:
     return [DBGoal(name=g.name, description=g.description) for g in goals]
 
 
 def goals_db_to_api(db_goals: List[DBGoal]) -> List[Goal]:
     return [Goal(name=g.name, description=g.description) for g in db_goals]
+
+
+class DBScore(Base):
+    __tablename__ = "training_scores"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    training_id: Mapped[int] = mapped_column(ForeignKey("trainings.id"))
+    author: Mapped[int] = mapped_column(Integer)
+    score: Mapped[int] = mapped_column(Integer)
+
+    @classmethod
+    def from_api(
+        cls, training_id: int, author: int, score: float
+    ) -> "DBScore":
+        int_score = round(score * SCORE_SCALE)
+        return cls(training_id=training_id, author=author, score=int_score)
+
+    def get_api_score(self) -> float:
+        float_score = self.score / SCORE_SCALE
+        return float_score
+
+    def update_score(self, score: float) -> None:
+        self.score = round(score * SCORE_SCALE)
 
 
 class DBTraining(Base):
@@ -115,7 +131,8 @@ class DBTraining(Base):
         if score_amount == 0:
             score = 0.0
         else:
-            score = sum((s.score for s in self.scores)) / score_amount
+            score_total = sum((s.score for s in self.scores))
+            score = score_total / (score_amount * SCORE_SCALE)
 
         return Training(
             id=self.id,

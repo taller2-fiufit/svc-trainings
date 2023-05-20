@@ -149,8 +149,8 @@ async def add_score(
         )
 
         if db_score is None:
-            db_score = DBScore(training_id=id, author=user, score=score)
+            db_score = DBScore.from_api(id, user, score)
         else:
-            db_score.score = score
+            db_score.update_score(score)
 
         session.add(db_score)

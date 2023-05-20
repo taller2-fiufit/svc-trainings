@@ -125,5 +125,6 @@ async def post_score(
     session: SessionDep, user: UserDep, id: int, score: ScoreBody
 ) -> ScoreBody:
     """Create or update a score"""
+    print(score)
     await trainings_db.add_score(session, id, user.sub, score.score)
     return score
