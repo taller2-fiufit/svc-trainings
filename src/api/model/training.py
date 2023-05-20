@@ -113,10 +113,27 @@ class Training(AllRequiredTrainingBase):
         description="The timestamp of this training's creation",
         alias="createdAt",
     )
+    score: float = Field(
+        title="Average score",
+        description="Average score of training",
+    )
+    score_amount: int = Field(
+        title="Amount of scores",
+        description="The amount of times this training was scored by users",
+    )
 
 
 class BlockStatus(BaseModel):
     blocked: bool = Field(
         title="Is blocked?",
         description="True if the training is blocked, false if it isn't",
+    )
+
+
+class ScoreBody(BaseModel):
+    score: int = Field(
+        title="Score",
+        description="Score given to training by user",
+        ge=0,
+        le=5,
     )

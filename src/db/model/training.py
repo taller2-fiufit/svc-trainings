@@ -42,6 +42,15 @@ class DBGoal(Base):
     description: Mapped[str] = mapped_column(String(300))
 
 
+class DBScore(Base):
+    __tablename__ = "training_scores"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    training_id: Mapped[int] = mapped_column(ForeignKey("trainings.id"))
+    author: Mapped[int] = mapped_column(Integer)
+    score: Mapped[int] = mapped_column(Integer)
+
+
 def goals_api_to_db(goals: List[Goal]) -> List[DBGoal]:
     return [DBGoal(name=g.name, description=g.description) for g in goals]
 
@@ -69,6 +78,10 @@ class DBTraining(Base):
         cascade="all, delete-orphan",
         lazy="immediate",
     )
+    scores: Mapped[List[DBScore]] = relationship(
+        cascade="all, delete-orphan",
+        lazy="immediate",
+    )
 
     @classmethod
     def from_api_model(
@@ -87,6 +100,7 @@ class DBTraining(Base):
             **training.dict(),
             "multimedia": db_multimedia,
             "goals": db_goals,
+            "scores": [],
         }
 
         return cls(author=author, **kwargs)
@@ -94,6 +108,14 @@ class DBTraining(Base):
     def to_api_model(self) -> Training:
         multimedia = multimedia_db_to_api(self.multimedia)
         goals = goals_db_to_api(self.goals)
+
+        score_amount = len(self.scores)
+
+        if score_amount == 0:
+            score = 0.0
+        else:
+            score = sum((s.score for s in self.scores)) / score_amount
+
         return Training(
             id=self.id,
             author=self.author,
@@ -105,6 +127,8 @@ class DBTraining(Base):
             difficulty=self.difficulty,
             multimedia=multimedia,
             goals=goals,
+            score=score,
+            score_amount=score_amount,
         )
 
     def update(

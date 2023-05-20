@@ -5,8 +5,12 @@ from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.api.model.training import CreateTraining, PatchTraining, Training
-from src.db.model.training import DBTraining
+from src.api.model.training import (
+    CreateTraining,
+    PatchTraining,
+    Training,
+)
+from src.db.model.training import DBScore, DBTraining
 
 
 async def get_all_trainings(
@@ -36,7 +40,7 @@ async def get_training_by_id(session: AsyncSession, id: int) -> Training:
     training = await session.get(DBTraining, id)
 
     if training is None:
-        raise HTTPException(HTTPStatus.NOT_FOUND, "Resource not found")
+        raise HTTPException(HTTPStatus.NOT_FOUND, "Training not found")
 
     return training.to_api_model()
 
@@ -71,7 +75,7 @@ async def patch_training(
         training = await session.get(DBTraining, id)
 
         if training is None:
-            raise HTTPException(HTTPStatus.NOT_FOUND, "Resource not found")
+            raise HTTPException(HTTPStatus.NOT_FOUND, "Training not found")
 
         if patch.title is not None and patch.title != training.title:
             await check_title_is_unique(session, patch.title)
@@ -98,10 +102,35 @@ async def change_block_status(
         training = await session.get(DBTraining, id)
 
         if training is None:
-            raise HTTPException(HTTPStatus.NOT_FOUND, "Resource not found")
+            raise HTTPException(HTTPStatus.NOT_FOUND, "Training not found")
 
         training.blocked = new_block_status
 
         session.add(training)
 
     return training.to_api_model()
+
+
+async def add_score(
+    session: AsyncSession,
+    id: int,
+    user: int,
+    score: int,
+) -> None:
+    """Adds a new score to the given training, or edits existing ones"""
+    async with session.begin():
+        training = await session.get(DBTraining, id)
+
+        if training is None:
+            raise HTTPException(HTTPStatus.NOT_FOUND, "Training not found")
+
+        db_score = await session.scalar(
+            select(DBScore).filter_by(training_id=id, author=user).limit(1)
+        )
+
+        if db_score is None:
+            db_score = DBScore(training_id=id, author=user, score=score)
+        else:
+            db_score.score = score
+
+        session.add(db_score)
