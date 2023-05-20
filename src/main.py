@@ -4,6 +4,8 @@ import re
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.openapi.docs import get_swagger_ui_html
 
 from src.api.trainings import router
 from src.logging import info
@@ -21,7 +23,9 @@ async def lifespan(
     yield
 
 
-app = FastAPI(lifespan=lifespan, title="Kinetix", version="0.1.0")
+app = FastAPI(
+    lifespan=lifespan, title="Kinetix", version="0.1.0", docs_url=None
+)
 
 
 origins_regex = re.compile(
@@ -48,3 +52,17 @@ app.include_router(router)
 def health_check() -> Dict[str, str]:
     """Check if server is responsive"""
     return {"status": "Alive and kicking!"}
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon() -> FileResponse:
+    return FileResponse("favicon.ico")
+
+
+@app.get("/docs", include_in_schema=False)
+async def swagger_ui_html():
+    return get_swagger_ui_html(
+        openapi_url="/openapi.json",
+        title=app.title,
+        swagger_favicon_url="favicon.ico",
+    )
