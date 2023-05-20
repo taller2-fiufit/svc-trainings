@@ -24,7 +24,7 @@ from src.api.scores import router as scores_router
 
 router = APIRouter(
     prefix="/trainings",
-    tags=["trainings"],
+    tags=["Trainings"],
     # List of dependencies that get run ALWAYS for router and subrouters.
     # For a single-route dependency use the route decorator's parameter "dependencies"
     dependencies=[Depends(get_session), Depends(get_user)],

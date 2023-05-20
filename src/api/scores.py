@@ -8,7 +8,7 @@ import src.db.trainings as trainings_db
 
 router = APIRouter(
     prefix="/{id}/scores",
-    tags=["trainings", "scores"],
+    tags=["Scores"],
 )
 
 
