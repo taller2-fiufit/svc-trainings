@@ -24,7 +24,11 @@ async def lifespan(
 
 
 app = FastAPI(
-    lifespan=lifespan, title="Kinetix", version="0.1.0", docs_url=None
+    lifespan=lifespan,
+    title="Kinetix",
+    version="0.1.0",
+    description="Kinetix's trainings service API",
+    docs_url=None,
 )
 
 
