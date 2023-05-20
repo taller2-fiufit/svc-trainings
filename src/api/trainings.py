@@ -44,16 +44,12 @@ async def get_all_trainings(
     author: Optional[Union[Literal["me"], int]] = None,
     mindiff: int = MIN_DIFFICULTY,
     maxdiff: int = MAX_DIFFICULTY + 1,
+    blocked: bool = False,
 ) -> List[Training]:
     """Get all trainings"""
-    if author is None:
-        return await trainings_db.get_all_trainings(
-            session, offset, limit, mindiff, maxdiff
-        )
-
-    u = user.sub if author == "me" else author
+    sub = user.sub if author == "me" else author
     return await trainings_db.get_all_trainings(
-        session, offset, limit, u, mindiff, maxdiff
+        session, offset, limit, mindiff, maxdiff, blocked, user=sub
     )
 
 
