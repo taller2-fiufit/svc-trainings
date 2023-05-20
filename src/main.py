@@ -48,8 +48,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
+# Set up internal routing
 app.include_router(router)
+
+
+# -----------------
+# Utility endpoints
+# -----------------
 
 
 @app.get("/health", include_in_schema=False)
