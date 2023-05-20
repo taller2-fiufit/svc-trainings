@@ -23,5 +23,5 @@ jobs:
       - name: Deploy
         uses: okteto/pipeline@latest
         with:
-          name: svc-trainings
+          name: svc-trainings-megaredhand
           timeout: 15m

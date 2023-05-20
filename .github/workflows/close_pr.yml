@@ -19,4 +19,4 @@ jobs:
       - name: Destroy preview environment
         uses: okteto/destroy-preview@latest
         with:
-          name: pr-${{ github.event.number }}-svc-trainings
+          name: pr-${{ github.event.number }}-svc-trainings-megaredhand
