@@ -128,15 +128,15 @@ async def get_score(
                 HTTPStatus.NOT_FOUND, "Score or training not found"
             )
 
-    return ScoreBody(score=db_score.score)
+    return ScoreBody(score=db_score.get_api_score())
 
 
 async def add_score(
     session: AsyncSession,
     id: int,
     user: int,
-    score: float,
-) -> None:
+    score: ScoreBody,
+) -> ScoreBody:
     """Adds a new score to the given training, or edits existing ones"""
     async with session.begin():
         training = await session.get(DBTraining, id)
@@ -149,8 +149,10 @@ async def add_score(
         )
 
         if db_score is None:
-            db_score = DBScore.from_api(id, user, score)
+            db_score = DBScore.from_api(id, user, score.score)
         else:
-            db_score.update_score(score)
+            db_score.update_score(score.score)
 
         session.add(db_score)
+
+    return ScoreBody(score=db_score.get_api_score())

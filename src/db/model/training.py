@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Dict, List, Optional
 from sqlalchemy import (
     Boolean,
@@ -82,7 +83,7 @@ class DBTraining(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     author: Mapped[int] = mapped_column(Integer)
     blocked: Mapped[bool] = mapped_column(Boolean, default=False)
-    created_at: Mapped[str] = mapped_column(DateTime, default=func.now())
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now())
     title: Mapped[str] = mapped_column(String(30), index=True, unique=True)
     description: Mapped[str] = mapped_column(String(300))
     type: Mapped[TrainingType] = mapped_column(Enum(TrainingType))
@@ -138,7 +139,7 @@ class DBTraining(Base):
             id=self.id,
             author=self.author,
             blocked=self.blocked,
-            created_at=self.created_at,  # type:ignore
+            created_at=self.created_at,  # type: ignore
             title=self.title,
             description=self.description,
             type=self.type,
