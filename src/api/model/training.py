@@ -1,5 +1,6 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Literal, Optional, Union
+from fastapi import Query
 from pydantic import BaseModel, ConstrainedStr, Field
 from src.api.model.utils import make_all_required
 
@@ -137,3 +138,20 @@ class ScoreBody(BaseModel):
         ge=0,
         le=5,
     )
+
+
+class FilterParams(BaseModel):
+    offset: int = Field(Query(0, title="Query initial offset"))
+    limit: int = Field(Query(100, title="Query item limit"))
+    author: Optional[Union[Literal["me"], int]] = Field(
+        Query(None, title="Author filter")
+    )
+    mindiff: int = Field(
+        Query(MIN_DIFFICULTY, title="Minimum training difficulty (inclusive)")
+    )
+    maxdiff: int = Field(
+        Query(
+            MAX_DIFFICULTY + 1, title="Maximum training difficulty (exclusive)"
+        )
+    )
+    blocked: bool = Field(Query(False, title="Return blocked trainings"))
