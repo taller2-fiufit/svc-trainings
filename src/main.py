@@ -4,7 +4,7 @@ import re
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.openapi.docs import get_swagger_ui_html
 
 from src.api.trainings import router
@@ -60,7 +60,7 @@ async def favicon() -> FileResponse:
 
 
 @app.get("/docs", include_in_schema=False)
-async def swagger_ui_html():
+async def swagger_ui_html() -> HTMLResponse:
     return get_swagger_ui_html(
         openapi_url="/openapi.json",
         title=app.title,
