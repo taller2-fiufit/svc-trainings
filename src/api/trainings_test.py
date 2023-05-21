@@ -1,73 +1,15 @@
-import pytest
-from typing import Any, AsyncGenerator, Dict
+from typing import Any, Dict
 from httpx import AsyncClient
 from http import HTTPStatus
 
-from src.auth import get_admin, get_user, ignore_auth
-from src.db.migration import downgrade_db
+
 from src.common.model import TrainingType
 from src.api.model.training import (
     BlockStatus,
     CreateTraining,
-    Goal,
-    Multimedia,
     PatchTraining,
     Training,
 )
-from src.main import app, lifespan
-from src.metrics.reports import get_reporter
-
-
-@pytest.fixture
-async def client() -> AsyncGenerator[AsyncClient, None]:
-    # reset database
-    await downgrade_db()
-
-    # https://fastapi.tiangolo.com/advanced/testing-dependencies/
-    app.dependency_overrides[get_user] = ignore_auth
-    app.dependency_overrides[get_admin] = ignore_auth
-
-    def stub_reporter(_: Training) -> None:
-        pass
-
-    app.dependency_overrides[get_reporter] = lambda: stub_reporter
-
-    async with lifespan(app):
-        async with AsyncClient(app=app, base_url="http://test") as client:
-            yield client
-
-
-@pytest.fixture
-async def check_empty(client: AsyncClient) -> None:
-    response = await client.get("/trainings")
-
-    assert response.status_code == HTTPStatus.OK
-
-    json = response.json()
-
-    assert json == []
-
-
-@pytest.fixture
-async def created_body(client: AsyncClient) -> Training:
-    body = CreateTraining(
-        title="title",
-        description="description",
-        type=TrainingType.WALK,
-        difficulty=1,
-        multimedia=[Multimedia("image_url"), Multimedia("video_url")],
-        goals=[Goal(name="goal_1", description="a _veeery_ long description")],
-    )
-
-    response = await client.post("/trainings", json=body.dict())
-
-    assert response.status_code == HTTPStatus.CREATED
-
-    result = CreateTraining(**response.json())
-
-    assert result == body
-
-    return Training(**response.json())
 
 
 async def test_trainings_get_empty(check_empty: None) -> None:
@@ -252,61 +194,3 @@ async def test_trainings_invalid_body(
         {**body.dict(), "goals": [{"name": "name", "description": "a" * 301}]},
         client,
     )
-
-
-# ------
-# SCORES
-# ------
-
-
-async def assert_score_is(
-    client: AsyncClient, score: float, score_amount: int, training_id: int
-) -> None:
-    response = await client.get(f"/trainings/{training_id}")
-
-    assert response.status_code == HTTPStatus.OK
-    assert response.json()["score"] == score
-    assert response.json()["score_amount"] == score_amount
-
-
-@pytest.fixture
-async def scored_training(
-    created_body: Training, client: AsyncClient
-) -> Training:
-    score = 2.3
-    response = await client.post(
-        f"/trainings/{created_body.id}/scores", json={"score": score}
-    )
-    assert response.status_code == HTTPStatus.CREATED
-    assert response.json() == {"score": score}
-
-    await assert_score_is(client, score, 1, created_body.id)
-
-    response = await client.get(f"/trainings/{created_body.id}")
-
-    created_body.score = score
-    created_body.score_amount = 1
-
-    return created_body
-
-
-async def test_post_score(
-    scored_training: Training, client: AsyncClient
-) -> None:
-    # NOTE: all checks are located inside the posted_score fixture
-    pass
-
-
-async def test_edit_score(
-    scored_training: Training, client: AsyncClient
-) -> None:
-    new_score = float((int(scored_training.score) + 2) % 5)
-    response = await client.post(
-        f"/trainings/{scored_training.id}/scores",
-        json={"score": new_score},
-    )
-
-    assert response.status_code == HTTPStatus.CREATED
-    assert response.json() == {"score": new_score}
-
-    await assert_score_is(client, new_score, 1, scored_training.id)
