@@ -12,8 +12,8 @@ from src.api.model.training import (
 )
 
 
-async def test_trainings_get_empty(check_empty: None) -> None:
-    # NOTE: all checks are located inside the check_empty fixture
+async def test_trainings_get_empty(check_empty_trainings: None) -> None:
+    # NOTE: all checks are located inside the check_empty_trainings fixture
     pass
 
 
@@ -46,7 +46,7 @@ async def test_trainings_post_duplicated_title(
 
 
 async def test_trainings_post_get(
-    check_empty: None, created_body: Training, client: AsyncClient
+    check_empty_trainings: None, created_body: Training, client: AsyncClient
 ) -> None:
     response = await client.get("/trainings")
     assert response.status_code == HTTPStatus.OK

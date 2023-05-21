@@ -11,7 +11,7 @@ from src.test_utils import assert_score_is
 async def test_post_score(
     scored_training: Training, client: AsyncClient
 ) -> None:
-    # NOTE: all checks are located inside the posted_score fixture
+    # NOTE: all checks are located inside the scored_training fixture
     pass
 
 

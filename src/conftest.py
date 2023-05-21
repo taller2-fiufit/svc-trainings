@@ -56,7 +56,7 @@ async def client() -> AsyncGenerator[AsyncClient, None]:
 
 
 @pytest.fixture
-async def check_empty(client: AsyncClient) -> None:
+async def check_empty_trainings(client: AsyncClient) -> None:
     response = await client.get("/trainings")
 
     assert response.status_code == HTTPStatus.OK
@@ -106,9 +106,31 @@ async def scored_training(
 
     await assert_score_is(client, score, 1, created_body.id)
 
-    response = await client.get(f"/trainings/{created_body.id}")
-
     created_body.score = score
     created_body.score_amount = 1
+
+    return created_body
+
+
+# -----------------
+# FAVORITE FIXTURES
+# -----------------
+
+
+@pytest.fixture
+async def check_empty_favorites(client: AsyncClient) -> None:
+    response = await client.get("/favorites")
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == []
+
+
+@pytest.fixture
+async def favorited_training(
+    created_body: Training, check_empty_favorites: None, client: AsyncClient
+) -> Training:
+    json = {"training_id": created_body.id}
+    response = await client.post("/favorites", json=json)
+    assert response.status_code == HTTPStatus.CREATED
+    assert response.json() == json
 
     return created_body
