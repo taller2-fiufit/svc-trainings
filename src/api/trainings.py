@@ -17,9 +17,6 @@ from src.db.utils import get_session
 from src.logging import info
 import src.db.trainings as trainings_db
 
-# subrouters
-from src.api.scores import router as scores_router
-
 
 router = APIRouter(
     prefix="/trainings",
@@ -100,5 +97,16 @@ async def block_training(
     return edited_training
 
 
-# Set up subrouters
-router.include_router(scores_router)
+# ----------
+# Subrouting
+# ----------
+
+
+def add_subrouters(router: APIRouter) -> None:
+    """Set up subrouters"""
+    from src.api.scores import router as scores_router
+
+    router.include_router(scores_router)
+
+
+add_subrouters(router)
