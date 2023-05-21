@@ -8,6 +8,7 @@ from src.api.model.training import Training
 from src.auth import get_user
 from src.db.utils import get_session
 import src.db.favorites as favorites_db
+from src.logging import info
 from src.metrics.reports import get_training_favorited_reporter
 
 
@@ -39,6 +40,7 @@ async def favorite(
 ) -> FavoriteRequest:
     """Favorite this training"""
     await favorites_db.favorite(session, user.sub, favorite.training_id)
+    info(f"User {user.sub} favorited training {favorite.training_id}")
     report_favorited(user.sub, favorite.training_id)
     return favorite
 
@@ -49,4 +51,5 @@ async def unfavorite(
 ) -> FavoriteRequest:
     """Un-favorite this training"""
     await favorites_db.unfavorite(session, user.sub, training_id)
+    info(f"User {user.sub} un-favorited training {training_id}")
     return FavoriteRequest(training_id=training_id)
