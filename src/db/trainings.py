@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.api.model.training import (
     CreateTraining,
     PatchTraining,
+    ScoreBody,
     Training,
 )
 from src.db.model.training import DBScore, DBTraining
@@ -112,12 +113,31 @@ async def change_block_status(
     return training.to_api_model()
 
 
+async def get_score(
+    session: AsyncSession,
+    id: int,
+    user: int,
+) -> ScoreBody:
+    """Gets your last score for the training"""
+    async with session.begin():
+        db_score = await session.scalar(
+            select(DBScore).filter_by(training_id=id, author=user).limit(1)
+        )
+
+        if db_score is None:
+            raise HTTPException(
+                HTTPStatus.NOT_FOUND, "Score or training not found"
+            )
+
+    return ScoreBody(score=db_score.get_api_score())
+
+
 async def add_score(
     session: AsyncSession,
     id: int,
     user: int,
-    score: int,
-) -> None:
+    score: ScoreBody,
+) -> ScoreBody:
     """Adds a new score to the given training, or edits existing ones"""
     async with session.begin():
         training = await session.get(DBTraining, id)
@@ -130,8 +150,10 @@ async def add_score(
         )
 
         if db_score is None:
-            db_score = DBScore(training_id=id, author=user, score=score)
+            db_score = DBScore.from_api(id, user, score.score)
         else:
-            db_score.score = score
+            db_score.update_score(score.score)
 
         session.add(db_score)
+
+    return ScoreBody(score=db_score.get_api_score())

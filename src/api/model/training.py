@@ -132,11 +132,11 @@ class BlockStatus(BaseModel):
 
 
 class ScoreBody(BaseModel):
-    score: int = Field(
+    score: float = Field(
         title="Score",
         description="Score given to training by user",
-        ge=0,
-        le=5,
+        ge=0.0,
+        le=5.0,
     )
 
 

@@ -1,9 +1,7 @@
 from http import HTTPStatus
-from typing import Annotated, Callable, List
+from typing import List, Annotated
 
 from fastapi import APIRouter, Depends
-
-from sqlalchemy.ext.asyncio import AsyncSession
 
 
 from src.api.model.training import (
@@ -11,27 +9,26 @@ from src.api.model.training import (
     CreateTraining,
     FilterParams,
     PatchTraining,
-    ScoreBody,
     Training,
 )
-from src.auth import User, get_admin, get_user
+from src.api.aliases import ReporterDep, SessionDep, UserDep
+from src.auth import get_admin, get_user
 from src.db.utils import get_session
-import src.db.trainings as trainings_db
 from src.logging import info
-from src.metrics.reports import get_reporter
+import src.db.trainings as trainings_db
+
+# subrouters
+from src.api.scores import router as scores_router
 
 
 router = APIRouter(
     prefix="/trainings",
-    tags=["trainings"],
-    # List of dependencies that get run ALWAYS. For a single-route dependency use
-    # the route decorator's parameter "dependencies"
+    tags=["Trainings"],
+    # List of dependencies that get run ALWAYS for router and subrouters.
+    # For a single-route dependency use the route decorator's parameter "dependencies"
     dependencies=[Depends(get_session), Depends(get_user)],
 )
 
-SessionDep = Annotated[AsyncSession, Depends(get_session)]
-ReporterDep = Annotated[Callable[[Training], None], Depends(get_reporter)]
-UserDep = Annotated[User, Depends(get_user)]
 Filters = Annotated[FilterParams, Depends()]
 
 
@@ -103,10 +100,5 @@ async def block_training(
     return edited_training
 
 
-@router.post("/{id}/scores", status_code=HTTPStatus.CREATED)
-async def post_score(
-    session: SessionDep, user: UserDep, id: int, score: ScoreBody
-) -> ScoreBody:
-    """Change training's blocked status"""
-    await trainings_db.add_score(session, id, user.sub, score.score)
-    return score
+# Set up subrouters
+router.include_router(scores_router)
