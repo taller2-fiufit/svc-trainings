@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import List
+from typing import Annotated, Callable, List
 from fastapi import APIRouter, Depends
 
 from src.api.aliases import SessionDep, UserDep
@@ -8,6 +8,7 @@ from src.api.model.training import Training
 from src.auth import get_user
 from src.db.utils import get_session
 import src.db.favorites as favorites_db
+from src.metrics.reports import get_training_favorited_reporter
 
 
 router = APIRouter(
@@ -15,6 +16,10 @@ router = APIRouter(
     tags=["Favorites"],
     dependencies=[Depends(get_session), Depends(get_user)],
 )
+
+FavoritedReporterDep = Annotated[
+    Callable[[int, int], None], Depends(get_training_favorited_reporter)
+]
 
 
 @router.get("")
@@ -27,10 +32,14 @@ async def get_favorites(
 
 @router.post("", status_code=HTTPStatus.CREATED)
 async def favorite(
-    session: SessionDep, user: UserDep, favorite: FavoriteRequest
+    session: SessionDep,
+    user: UserDep,
+    report_favorited: FavoritedReporterDep,
+    favorite: FavoriteRequest,
 ) -> FavoriteRequest:
     """Favorite this training"""
     await favorites_db.favorite(session, user.sub, favorite.training_id)
+    report_favorited(user.sub, favorite.training_id)
     return favorite
 
 

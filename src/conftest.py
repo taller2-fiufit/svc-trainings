@@ -7,7 +7,7 @@ from http import HTTPStatus
 from src.auth import get_admin, get_user, ignore_auth
 from src.db.migration import downgrade_db
 from src.main import app, lifespan
-from src.metrics.reports import get_reporter
+from src.metrics.reports import get_training_creation_reporter
 from src.common.model import TrainingType
 from src.api.model.training import (
     CreateTraining,
@@ -43,7 +43,9 @@ async def client() -> AsyncGenerator[AsyncClient, None]:
     def stub_reporter(_: Training) -> None:
         pass
 
-    app.dependency_overrides[get_reporter] = lambda: stub_reporter
+    app.dependency_overrides[
+        get_training_creation_reporter
+    ] = lambda: stub_reporter
 
     async with lifespan(app):
         async with AsyncClient(app=app, base_url="http://test") as client:
