@@ -30,6 +30,7 @@ async def favorite(
     session: SessionDep, user: UserDep, favorite: FavoriteRequest
 ) -> FavoriteRequest:
     """Favorite this training"""
+    await favorites_db.favorite(session, user.sub, favorite.training_id)
     return favorite
 
 

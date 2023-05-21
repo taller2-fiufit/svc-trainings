@@ -15,4 +15,4 @@ class DBFavorite(Base):
     training_id: Mapped[int] = mapped_column(ForeignKey("trainings.id"))
     user_id: Mapped[int] = mapped_column(Integer)
 
-    training: Mapped[DBTraining] = relationship()
+    training: Mapped[DBTraining] = relationship(lazy="joined")

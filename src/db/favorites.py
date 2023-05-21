@@ -1,4 +1,6 @@
+from http import HTTPStatus
 from typing import List, Optional
+from fastapi import HTTPException
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,12 +18,28 @@ async def get_favorites(
     limit: int,
     user_id: Optional[int] = None,
 ) -> List[Training]:
-    query = select(DBFavorite.training)
+    """Get all the user's favorited trainings"""
+    query = select(DBFavorite)
 
     if user_id is not None:
         query = query.filter(DBFavorite.user_id == user_id)
 
     res = await session.scalars(query.offset(offset).limit(limit))
-    trainings = res.all()
+    trainings = map(lambda f: f.training, res.all())
 
     return list(map(DBTraining.to_api_model, trainings))
+
+
+async def favorite(
+    session: AsyncSession, user_id: int, training_id: int
+) -> None:
+    """Add a training to the user's favorites"""
+    async with session.begin():
+        training = await session.get(DBTraining, training_id)
+
+        if training is None:
+            raise HTTPException(HTTPStatus.NOT_FOUND, "Training not found")
+
+        favorite = DBFavorite(user_id=user_id, training_id=training_id)
+
+        session.add(favorite)
