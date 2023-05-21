@@ -34,9 +34,10 @@ async def favorite(
     return favorite
 
 
-@router.delete("")
+@router.delete("/{training_id}")
 async def unfavorite(
-    session: SessionDep, user: UserDep, favorite: FavoriteRequest
+    session: SessionDep, user: UserDep, training_id: int
 ) -> FavoriteRequest:
     """Un-favorite this training"""
-    return favorite
+    await favorites_db.unfavorite(session, user.sub, training_id)
+    return FavoriteRequest(training_id=training_id)

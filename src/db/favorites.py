@@ -43,3 +43,22 @@ async def favorite(
         favorite = DBFavorite(user_id=user_id, training_id=training_id)
 
         session.add(favorite)
+
+
+async def unfavorite(
+    session: AsyncSession, user_id: int, training_id: int
+) -> None:
+    """Add a training to the user's favorites"""
+    async with session.begin():
+        favorite = await session.scalar(
+            select(DBFavorite)
+            .filter_by(user_id=user_id, training_id=training_id)
+            .limit(1)
+        )
+
+        if favorite is None:
+            raise HTTPException(
+                HTTPStatus.NOT_FOUND, "Training's not favorited"
+            )
+
+        await session.delete(favorite)

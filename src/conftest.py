@@ -15,7 +15,7 @@ from src.api.model.training import (
     Multimedia,
     Training,
 )
-from src.test_utils import assert_score_is
+from src.test_utils import assert_returns_empty, assert_score_is
 
 
 # https://stackoverflow.com/questions/71925980/cannot-perform-operation-another-operation-is-in-progress-in-pytest
@@ -57,13 +57,7 @@ async def client() -> AsyncGenerator[AsyncClient, None]:
 
 @pytest.fixture
 async def check_empty_trainings(client: AsyncClient) -> None:
-    response = await client.get("/trainings")
-
-    assert response.status_code == HTTPStatus.OK
-
-    json = response.json()
-
-    assert json == []
+    await assert_returns_empty(client, "/trainings")
 
 
 @pytest.fixture
@@ -119,9 +113,7 @@ async def scored_training(
 
 @pytest.fixture
 async def check_empty_favorites(client: AsyncClient) -> None:
-    response = await client.get("/favorites")
-    assert response.status_code == HTTPStatus.OK
-    assert response.json() == []
+    await assert_returns_empty(client, "/favorites")
 
 
 @pytest.fixture
