@@ -12,13 +12,14 @@ lint:
 mypy:
 	poetry run mypy --strict src alembic
 
-test:
-	rm local.db 2> /dev/null || true
-	poetry run pytest -sv .
+clean-db:
 	rm local.db 2> /dev/null || true
 
-coverage:
+test: clean-db
+	poetry run pytest -sv .
+
+coverage: clean-db
 	poetry run pytest --cov . --cov-report xml
 
 run: install
-	poetry run uvicorn src.main:app --host 0.0.0.0 --port 8080
+	poetry run uvicorn src.main:app --host 0.0.0.0 --port 8080 --reload
