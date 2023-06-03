@@ -20,10 +20,13 @@ async def get_all_trainings(
     limit: int,
     mindiff: int,
     maxdiff: int,
-    blocked: bool,
+    blocked: Optional[bool] = None,
     user: Optional[int] = None,
 ) -> List[Training]:
-    query = select(DBTraining).filter_by(blocked=blocked)
+    query = select(DBTraining)
+
+    if blocked is not None:
+        query = query.filter_by(blocked=blocked)
 
     if user is not None:
         query = query.filter_by(author=user)
