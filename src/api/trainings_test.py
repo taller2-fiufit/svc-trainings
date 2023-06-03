@@ -179,6 +179,11 @@ async def test_filter_trainings(
     assert response.status_code == HTTPStatus.OK
     assert len(response.json()) == 1
 
+    params["blocked"] = "all"
+    response = await client.get("/trainings", params=params)
+    assert response.status_code == HTTPStatus.OK
+    assert len(response.json()) == 1
+
     params["mindiff"] = created_body.difficulty
     response = await client.get("/trainings", params=params)
     assert response.status_code == HTTPStatus.OK
