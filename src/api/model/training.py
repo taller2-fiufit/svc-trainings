@@ -154,4 +154,6 @@ class FilterParams(BaseModel):
             MAX_DIFFICULTY + 1, title="Maximum training difficulty (exclusive)"
         )
     )
-    blocked: Union[bool, Literal["all"]] = Field(Query(False, title="Return blocked trainings"))
+    blocked: Union[bool, Literal["all"]] = Field(
+        Query(False, title="Return blocked trainings")
+    )
