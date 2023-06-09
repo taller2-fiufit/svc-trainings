@@ -14,7 +14,13 @@ from src.db.config import SQLALCHEMY_DATABASE_URL
 
 # import needed to run model classes declarations
 # as that adds needed metadata to Base
-from src.db.model.training import DBTraining  # noqa # type: ignore
+from src.db.model.training import (  # noqa # type: ignore
+    DBTraining,
+    DBScore,
+    DBGoal,
+    DBMultimedia,
+)
+from src.db.model.favorite import DBFavorite  # noqa # type: ignore
 
 
 # this is the Alembic Config object, which provides
