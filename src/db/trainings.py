@@ -102,7 +102,7 @@ async def change_block_status(
     id: int,
     new_block_status: bool,
 ) -> Training:
-    """Updates the training's info"""
+    """Updates the training's block status"""
     async with session.begin():
         training = await session.get(DBTraining, id)
 

@@ -7,7 +7,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.openapi.docs import get_swagger_ui_html
 
-from src.api.trainings import router
 from src.logging import info
 from src.db.migration import upgrade_db
 
@@ -48,8 +47,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Set up internal routing
-app.include_router(router)
+
+# ----------
+# Subrouting
+# ----------
+
+
+def add_subrouters(app: FastAPI) -> None:
+    """Set up subrouters"""
+    from src.api.trainings import router as trainings_router
+    from src.api.favorites import router as favorites_router
+
+    app.include_router(trainings_router)
+    app.include_router(favorites_router)
+
+
+add_subrouters(app)
 
 
 # -----------------

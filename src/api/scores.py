@@ -3,6 +3,7 @@ from fastapi import APIRouter
 
 from src.api.aliases import SessionDep, UserDep
 from src.api.model.training import ScoreBody
+from src.logging import info
 import src.db.trainings as trainings_db
 
 
@@ -25,4 +26,6 @@ async def post_score(
     session: SessionDep, user: UserDep, id: int, score: ScoreBody
 ) -> ScoreBody:
     """Create or update a score"""
-    return await trainings_db.add_score(session, id, user.sub, score)
+    res = await trainings_db.add_score(session, id, user.sub, score)
+    info(f"New score: {res.score}, for training: {id}")
+    return res

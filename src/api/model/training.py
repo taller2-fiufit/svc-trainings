@@ -2,21 +2,13 @@ from datetime import datetime
 from typing import List, Literal, Optional, Union
 from fastapi import Query
 from pydantic import BaseModel, ConstrainedStr, Field
-from src.api.model.utils import make_all_required
+from src.api.model.utils import OrmModel, make_all_required
 
 from src.common.model import TrainingType
 
 
 MIN_DIFFICULTY = 0
 MAX_DIFFICULTY = 10
-
-
-class OrmModel(BaseModel):
-    class Config:
-        # https://docs.pydantic.dev/usage/models/#orm-mode-aka-arbitrary-class-instances
-        orm_mode = True
-        # https://stackoverflow.com/questions/69433904/assigning-pydantic-fields-not-by-alias
-        allow_population_by_field_name = True
 
 
 # https://github.com/pydantic/pydantic/issues/156
@@ -101,9 +93,9 @@ class PatchTraining(TrainingBase):
 
 
 class Training(AllRequiredTrainingBase):
-    id: int = Field(title="Title", description="The training's id")
+    id: int = Field(title="ID", description="The training's ID")
     author: int = Field(
-        title="Author's id", description="The training author's id"
+        title="Author's ID", description="The training author's ID"
     )
     blocked: bool = Field(
         title="Is blocked?",

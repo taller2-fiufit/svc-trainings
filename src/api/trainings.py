@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import List, Annotated
+from typing import Callable, List, Annotated
 
 from fastapi import APIRouter, Depends
 
@@ -11,14 +11,12 @@ from src.api.model.training import (
     PatchTraining,
     Training,
 )
-from src.api.aliases import ReporterDep, SessionDep, UserDep
+from src.api.aliases import SessionDep, UserDep
 from src.auth import get_admin, get_user
 from src.db.utils import get_session
 from src.logging import info
 import src.db.trainings as trainings_db
-
-# subrouters
-from src.api.scores import router as scores_router
+from src.metrics.reports import get_training_creation_reporter
 
 
 router = APIRouter(
@@ -30,6 +28,9 @@ router = APIRouter(
 )
 
 Filters = Annotated[FilterParams, Depends()]
+CreationReporterDep = Annotated[
+    Callable[[Training], None], Depends(get_training_creation_reporter)
+]
 
 
 @router.get("")
@@ -56,7 +57,7 @@ async def get_training(session: SessionDep, id: int) -> Training:
 async def post_training(
     session: SessionDep,
     user: UserDep,
-    report_creation: ReporterDep,
+    report_created: CreationReporterDep,
     training: CreateTraining,
 ) -> Training:
     """Create a new training"""
@@ -64,7 +65,7 @@ async def post_training(
         session, user.sub, training
     )
     info(f"New training created: {new_training}")
-    report_creation(new_training)
+    report_created(new_training)
     return new_training
 
 
@@ -101,5 +102,16 @@ async def block_training(
     return edited_training
 
 
-# Set up subrouters
-router.include_router(scores_router)
+# ----------
+# Subrouting
+# ----------
+
+
+def add_subrouters(router: APIRouter) -> None:
+    """Set up subrouters"""
+    from src.api.scores import router as scores_router
+
+    router.include_router(scores_router)
+
+
+add_subrouters(router)
