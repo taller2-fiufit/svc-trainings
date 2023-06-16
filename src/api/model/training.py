@@ -138,6 +138,10 @@ class FilterParams(BaseModel):
     author: Optional[Union[Literal["me"], int]] = Field(
         Query(None, title="Author filter")
     )
+    type: Optional[TrainingType] = Field(
+        title="Type filter",
+        default=None,
+    )
     mindiff: int = Field(
         Query(MIN_DIFFICULTY, title="Minimum training difficulty (inclusive)")
     )
