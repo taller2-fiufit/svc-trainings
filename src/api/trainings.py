@@ -43,7 +43,14 @@ async def get_all_trainings(
     sub = user.sub if f.author == "me" else f.author
     blk = f.blocked if f.blocked != "all" else None
     return await trainings_db.get_all_trainings(
-        session, f.offset, f.limit, f.mindiff, f.maxdiff, blk, user=sub
+        session,
+        f.offset,
+        f.limit,
+        f.mindiff,
+        f.maxdiff,
+        blk,
+        user=sub,
+        type=f.type,
     )
 
 

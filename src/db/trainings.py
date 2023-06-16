@@ -11,6 +11,7 @@ from src.api.model.training import (
     ScoreBody,
     Training,
 )
+from src.common.model import TrainingType
 from src.db.model.training import DBScore, DBTraining
 
 
@@ -22,6 +23,7 @@ async def get_all_trainings(
     maxdiff: int,
     blocked: Optional[bool] = None,
     user: Optional[int] = None,
+    type: Optional[TrainingType] = None,
 ) -> List[Training]:
     query = select(DBTraining)
 
@@ -30,6 +32,9 @@ async def get_all_trainings(
 
     if user is not None:
         query = query.filter_by(author=user)
+
+    if type is not None:
+        query = query.filter_by(type=type)
 
     query = query.filter(
         DBTraining.difficulty >= mindiff, DBTraining.difficulty < maxdiff
