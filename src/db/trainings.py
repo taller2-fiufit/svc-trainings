@@ -69,9 +69,9 @@ async def create_training(
 ) -> Training:
     new_training = DBTraining.from_api_model(author, training)
 
-    async with session.begin():
-        await check_title_is_unique(session, training.title)  # type: ignore
-        session.add(new_training)
+    await check_title_is_unique(session, training.title)  # type: ignore
+    session.add(new_training)
+    await session.commit()
 
     return new_training.to_api_model()
 
@@ -81,23 +81,23 @@ async def patch_training(
 ) -> Training:
     """Updates the training's info"""
 
-    async with session.begin():
-        training = await session.get(DBTraining, id)
+    training = await session.get(DBTraining, id)
 
-        if training is None:
-            raise HTTPException(HTTPStatus.NOT_FOUND, "Training not found")
+    if training is None:
+        raise HTTPException(HTTPStatus.NOT_FOUND, "Training not found")
 
-        if patch.title is not None and patch.title != training.title:
-            await check_title_is_unique(session, patch.title)
+    if patch.title is not None and patch.title != training.title:
+        await check_title_is_unique(session, patch.title)
 
-        if training.author != author:
-            raise HTTPException(
-                HTTPStatus.UNAUTHORIZED, "User isn't author of the training"
-            )
+    if training.author != author:
+        raise HTTPException(
+            HTTPStatus.UNAUTHORIZED, "User isn't author of the training"
+        )
 
-        training.update(**patch.dict())
+    training.update(**patch.dict())
 
-        session.add(training)
+    session.add(training)
+    await session.commit()
 
     return training.to_api_model()
 
@@ -108,15 +108,15 @@ async def change_block_status(
     new_block_status: bool,
 ) -> Training:
     """Updates the training's block status"""
-    async with session.begin():
-        training = await session.get(DBTraining, id)
+    training = await session.get(DBTraining, id)
 
-        if training is None:
-            raise HTTPException(HTTPStatus.NOT_FOUND, "Training not found")
+    if training is None:
+        raise HTTPException(HTTPStatus.NOT_FOUND, "Training not found")
 
-        training.blocked = new_block_status
+    training.blocked = new_block_status
 
-        session.add(training)
+    session.add(training)
+    await session.commit()
 
     return training.to_api_model()
 
@@ -127,15 +127,14 @@ async def get_score(
     user: int,
 ) -> ScoreBody:
     """Gets your last score for the training"""
-    async with session.begin():
-        db_score = await session.scalar(
-            select(DBScore).filter_by(training_id=id, author=user).limit(1)
-        )
+    db_score = await session.scalar(
+        select(DBScore).filter_by(training_id=id, author=user).limit(1)
+    )
 
-        if db_score is None:
-            raise HTTPException(
-                HTTPStatus.NOT_FOUND, "Score or training not found"
-            )
+    if db_score is None:
+        raise HTTPException(
+            HTTPStatus.NOT_FOUND, "Score or training not found"
+        )
 
     return ScoreBody(score=db_score.get_api_score())
 
@@ -147,21 +146,21 @@ async def add_score(
     score: ScoreBody,
 ) -> ScoreBody:
     """Adds a new score to the given training, or edits existing ones"""
-    async with session.begin():
-        training = await session.get(DBTraining, id)
+    training = await session.get(DBTraining, id)
 
-        if training is None:
-            raise HTTPException(HTTPStatus.NOT_FOUND, "Training not found")
+    if training is None:
+        raise HTTPException(HTTPStatus.NOT_FOUND, "Training not found")
 
-        db_score = await session.scalar(
-            select(DBScore).filter_by(training_id=id, author=user).limit(1)
-        )
+    db_score = await session.scalar(
+        select(DBScore).filter_by(training_id=id, author=user).limit(1)
+    )
 
-        if db_score is None:
-            db_score = DBScore.from_api(id, user, score.score)
-        else:
-            db_score.update_score(score.score)
+    if db_score is None:
+        db_score = DBScore.from_api(id, user, score.score)
+    else:
+        db_score.update_score(score.score)
 
-        session.add(db_score)
+    session.add(db_score)
+    await session.commit()
 
     return ScoreBody(score=db_score.get_api_score())
