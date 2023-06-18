@@ -60,6 +60,10 @@ async def client() -> AsyncGenerator[AsyncClient, None]:
 @pytest.fixture
 async def check_empty_trainings(client: AsyncClient) -> None:
     await assert_returns_empty(client, "/trainings")
+    response = await client.get("/trainings/count")
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {"count": 0}
 
 
 @pytest.fixture

@@ -153,3 +153,7 @@ class FilterParams(BaseModel):
     blocked: Union[bool, Literal["all"]] = Field(
         Query(False, title="Return blocked trainings")
     )
+
+
+class TrainingCount(OrmModel):
+    count: int = Field(title="Count", description="The number of trainings")

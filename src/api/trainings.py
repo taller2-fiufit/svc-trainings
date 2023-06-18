@@ -10,6 +10,7 @@ from src.api.model.training import (
     FilterParams,
     PatchTraining,
     Training,
+    TrainingCount,
 )
 from src.api.aliases import SessionDep, UserDep
 from src.auth import get_admin, get_user
@@ -52,6 +53,21 @@ async def get_all_trainings(
         blk,
         user=sub,
         type=type,
+    )
+
+
+@router.get("/count")
+async def get_training_count(
+    session: SessionDep,
+    user: UserDep,
+    f: Filters,
+) -> TrainingCount:
+    """Get the number of trainings"""
+    sub = user.sub if f.author == "me" else f.author
+    blk = f.blocked if f.blocked != "all" else None
+    type = f.type if f.type != "all" else None
+    return await trainings_db.count_trainings(
+        session, f.mindiff, f.maxdiff, blk, user=sub, type=type
     )
 
 
