@@ -2,7 +2,7 @@ from http import HTTPStatus
 from typing import List, Optional
 from fastapi import HTTPException
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.model.training import (
@@ -10,6 +10,7 @@ from src.api.model.training import (
     PatchTraining,
     ScoreBody,
     Training,
+    TrainingCount,
 )
 from src.common.model import TrainingType
 from src.db.model.training import DBScore, DBTraining
@@ -44,6 +45,35 @@ async def get_all_trainings(
     trainings = res.all()
 
     return list(map(DBTraining.to_api_model, trainings))
+
+
+async def count_trainings(
+    session: AsyncSession,
+    mindiff: int,
+    maxdiff: int,
+    blocked: Optional[bool] = None,
+    user: Optional[int] = None,
+    type: Optional[TrainingType] = None,
+) -> TrainingCount:
+    """Counts the number of services"""
+    query = select(func.count()).select_from(DBTraining)
+
+    if blocked is not None:
+        query = query.filter_by(blocked=blocked)
+
+    if user is not None:
+        query = query.filter_by(author=user)
+
+    if type is not None:
+        query = query.filter_by(type=type)
+
+    query = query.filter(
+        DBTraining.difficulty >= mindiff, DBTraining.difficulty < maxdiff
+    )
+
+    count = (await session.scalar(query)) or 0
+
+    return TrainingCount(count=count)
 
 
 async def get_training_by_id(session: AsyncSession, id: int) -> Training:

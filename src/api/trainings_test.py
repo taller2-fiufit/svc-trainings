@@ -61,6 +61,11 @@ async def test_trainings_post_get(
     assert response.status_code == HTTPStatus.OK
     assert got == Training(**response.json())
 
+    response = await client.get("/trainings/count")
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {"count": 1}
+
 
 async def test_trainings_block(
     created_body: Training, client: AsyncClient
