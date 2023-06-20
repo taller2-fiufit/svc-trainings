@@ -161,7 +161,6 @@ class DBTraining(Base):
         multimedia: Optional[List[str]] = None,
         goals: Optional[List[Dict[str, str]]] = None,
     ) -> None:
-        DBTraining()
         self.author = author or self.author
         self.blocked = blocked or self.blocked
         self.title = title or self.title

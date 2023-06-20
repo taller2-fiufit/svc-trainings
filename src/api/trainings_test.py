@@ -145,7 +145,7 @@ async def test_filter_trainings(
 
 async def assert_invalid(body: dict[str, Any], client: AsyncClient) -> None:
     response_post = await client.post("/trainings", json=body)
-    assert response_post.status_code
+    assert response_post.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
 
     response_patch = await client.patch("/trainings/1", json=body)
     assert response_patch.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
