@@ -76,7 +76,7 @@ class ApikeyMiddleware:
         apikey = Headers(scope=scope).get(APIKEY_HEADER, None)
 
         if not req_apikey_is_valid(apikey):
-            response = Response(status_code=444)
+            response = Response(status_code=HTTPStatus.IM_A_TEAPOT)
             await response(scope, receive, send)
             return
 
