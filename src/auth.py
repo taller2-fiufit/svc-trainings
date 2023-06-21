@@ -73,9 +73,10 @@ class ApikeyMiddleware:
     async def __call__(
         self, scope: Scope, receive: Receive, send: Send
     ) -> None:
+        assert scope["type"] == "http"
         apikey = Headers(scope=scope).get(APIKEY_HEADER, None)
 
-        if not req_apikey_is_valid(apikey):
+        if not req_apikey_is_valid(apikey) and scope["path"] != "/health":
             response = Response(status_code=HTTPStatus.IM_A_TEAPOT)
             await response(scope, receive, send)
             return
