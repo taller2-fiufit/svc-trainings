@@ -2,12 +2,14 @@ import os
 from typing import Annotated, Optional
 from http import HTTPStatus
 from pydantic import BaseModel
-from starlette.types import Receive, Scope, Send, ASGIApp
-from starlette.datastructures import Headers
+from starlette.middleware.base import (
+    BaseHTTPMiddleware,
+    RequestResponseEndpoint,
+)
 from jose import jwt
 from jose.exceptions import JWTError, ExpiredSignatureError, JWTClaimsError
 from fastapi.security import OAuth2PasswordBearer
-from fastapi import Depends, HTTPException, Response
+from fastapi import Depends, HTTPException, Request, Response
 
 from src.logging import info
 
@@ -71,19 +73,13 @@ def req_apikey_is_valid(apikey: Optional[str]) -> bool:
     return True
 
 
-class ApikeyMiddleware:
-    def __init__(self, app: ASGIApp) -> None:
-        self.app = app
+class ApikeyMiddleware(BaseHTTPMiddleware):
+    async def dispatch(
+        self, request: Request, call_next: RequestResponseEndpoint
+    ) -> Response:
+        apikey = request.headers.get(APIKEY_HEADER, None)
 
-    async def __call__(
-        self, scope: Scope, receive: Receive, send: Send
-    ) -> None:
-        assert scope["type"] == "http"
-        apikey = Headers(scope=scope).get(APIKEY_HEADER, None)
+        if request.url.path != "/health" and not req_apikey_is_valid(apikey):
+            return Response(status_code=HTTPStatus.UNAUTHORIZED)
 
-        if scope["path"] != "/health" and not req_apikey_is_valid(apikey):
-            response = Response(status_code=HTTPStatus.UNAUTHORIZED)
-            await response(scope, receive, send)
-            return
-
-        await self.app(scope, receive, send)
+        return await call_next(request)
