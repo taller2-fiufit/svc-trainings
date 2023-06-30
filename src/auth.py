@@ -9,6 +9,8 @@ from jose.exceptions import JWTError, ExpiredSignatureError, JWTClaimsError
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import Depends, HTTPException, Response
 
+from src.logging import info
+
 _AUTH_SECRET = os.getenv("AUTH_SECRET")
 AUTH_SECRET = _AUTH_SECRET if _AUTH_SECRET is not None else ""
 
@@ -63,7 +65,10 @@ APIKEY_HEADER = "X-Apikey"
 
 def req_apikey_is_valid(apikey: Optional[str]) -> bool:
     """Returns True if the apikey is valid or we aren't checking"""
-    return APIKEY is None or apikey == APIKEY
+    if APIKEY is not None and apikey != APIKEY:
+        info(f"Invalid APIkey received: {apikey}")
+        return False
+    return True
 
 
 class ApikeyMiddleware:
