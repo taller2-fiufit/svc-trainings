@@ -20,6 +20,7 @@ deploy:
   - kubectl delete secret "trainings-secrets" || true
   - kubectl create secret generic "trainings-secrets"
     --from-literal="auth-secret"="${AUTH_SECRET}"
+    --from-literal="apikey"="${TRAININGS_APIKEY}"
     --from-literal="aws-access-key-id"="${AWS_ACCESS_KEY_ID}"
     --from-literal="aws-secret-access-key"="${AWS_SECRET_ACCESS_KEY}"
   # update kubernetes status

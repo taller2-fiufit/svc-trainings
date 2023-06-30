@@ -1,12 +1,13 @@
+import re
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator, Dict
-import re
 
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.openapi.docs import get_swagger_ui_html
+from fastapi.middleware import Middleware
 
+from src.auth import ApikeyMiddleware
 from src.logging import info
 from src.db.migration import upgrade_db
 
@@ -28,6 +29,7 @@ app = FastAPI(
     version="0.1.0",
     description="Kinetix's trainings service API",
     docs_url=None,
+    middleware=[Middleware(ApikeyMiddleware)],
 )
 
 
@@ -38,15 +40,6 @@ origins_regex = re.compile(
         r"[\w\.-]*(megaredhand|fedecolangelo)\.cloud\.okteto\.net)"  # okteto
     )
 )
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origin_regex=origins_regex,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 
 # ----------
 # Subrouting
