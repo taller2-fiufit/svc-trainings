@@ -21,4 +21,4 @@ COPY . .
 EXPOSE 80
 
 # main.py : app variable
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "80", "--reload"]
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "80", "--lifespan", "on"]
